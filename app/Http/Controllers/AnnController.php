@@ -73,7 +73,7 @@ class AnnController extends Controller
             ], 422);
         }
 
-        $ann->image_path = $path;
+        $ann->image_path = $img_id . $nam;
 
         if ($ann->save()) {
             return response()->json([
@@ -92,7 +92,7 @@ class AnnController extends Controller
         $ann = Announcement::find($id);
         $path;
         $name;
-        $img_id =  uniqid("ann", false) . date("mmddyyyHis");
+        $img_id = uniqid("ann", false) . date("mmddyyyHis");
         if ($request->hasFile('announcement_img')) {
             $allowedFileExtension = ['png', 'jpg', 'jpeg', 'gif'];
 

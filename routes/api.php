@@ -57,7 +57,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('announcement/post', [AnnController::class, 'post_ann']);
     //http://127.0.0.1:8000/api/announcement/1?_method=PUT
-    Route::put('announcement/{id}', [AnnController::class, 'put_ann']);
+    Route::put('announcement/put/{id}', [AnnController::class, 'put_ann']);
 
     Route::post('signout', [AuthController::class, 'signout']);
 
