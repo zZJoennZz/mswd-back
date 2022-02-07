@@ -60,6 +60,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('announcement/{id}', [AnnController::class, 'put_ann']);
 
     Route::post('signout', [AuthController::class, 'signout']);
+
+    Route::get('appli', [ServAppliController::class, 'get_all']);
 });
 
 //test
