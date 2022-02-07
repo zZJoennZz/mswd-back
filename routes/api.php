@@ -55,7 +55,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('faq/{id}', [FaqController::class, 'put_faq']);
     Route::delete('faq/{id}', [FaqController::class, 'delete_faq']);
 
-    Route::post('announcement', [AnnController::class, 'post_ann']);
+    Route::post('announcement/post', [AnnController::class, 'post_ann']);
     //http://127.0.0.1:8000/api/announcement/1?_method=PUT
     Route::put('announcement/{id}', [AnnController::class, 'put_ann']);
 
