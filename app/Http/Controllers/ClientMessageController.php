@@ -48,16 +48,16 @@ class ClientMessageController extends Controller
         $new_msg->full_name = $msg['full_name'];
         $new_msg->subject = $msg['subject'];
         $new_msg->message = $msg['message'];
-        $new_msg->notes = $msg['notes'];
-        $new_msg->status = $msg['status'];
+        $new_msg->notes = "";
+        $new_msg->status = 0;
 
         if ($new_msg->save()) {
-            return response->json([
+            return response()->json([
                 'success' => true,
                 'message' => 'Message is submitted'
             ], 200);
         } else {
-            return response->json([
+            return response()->json([
                 'success' => false,
                 'message' => 'Message is NOT submitted'
             ], 500);
@@ -75,9 +75,10 @@ class ClientMessageController extends Controller
             ], 404);
         }
 
-        $updated = $msg->fill($data)->save();
+        $msg->status = $msg_changes['status'];
+        echo $msg->status . "-" . $msg_changes['status'];
 
-        if ($updated) {
+        if ($msg->save()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Status is updated'

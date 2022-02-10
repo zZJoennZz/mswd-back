@@ -32,32 +32,33 @@ Route::post('validate', [AuthController::class, 'validateToken']);
 Route::middleware('auth:api')->group(function () {
     Route::resource('blog', BlogController::class);
 
-    Route::post('org/division', [OrgController::class, 'post_division']);
+    Route::post('org/division/post', [OrgController::class, 'post_division']);
     Route::put('org/division/{id}', [OrgController::class, 'put_division']);
     Route::delete('org/division/{id}', [OrgController::class, 'delete_division']);
 
     Route::get('org/person', [OrgController::class, 'get_person']);
-    Route::post('org/person', [OrgController::class, 'post_person']);
+    Route::post('org/person/post', [OrgController::class, 'post_person']);
     Route::put('org/person/{id}', [OrgController::class, 'put_person']);
     Route::delete('org/person/{id}', [OrgController::class, 'delete_person']);
 
-    Route::post('org/position', [OrgController::class, 'post_position']);
+    Route::post('org/position/post', [OrgController::class, 'post_position']);
     Route::put('org/position/{id}', [OrgController::class, 'put_position']);
     Route::delete('org/position/{id}', [OrgController::class, 'delete_position']);
 
-    Route::put('client_message/{id}', [ClientMessageController::class, 'change_status']);
+    Route::put('client_message/put/{id}', [ClientMessageController::class, 'change_status']);
     Route::delete('client_message/{id}', [ClientMessageController::class, 'delete_msg']);
     Route::get('client_message', [ClientMessageController::class, 'get_all']);
     Route::get('client_message/{id}', [ClientMessageController::class, 'get_msg']);
 
     Route::get('faq/{id}', [FaqController::class, 'get_single']);
-    Route::post('faq', [FaqController::class, 'post_faq']);
+    Route::post('faq/post', [FaqController::class, 'post_faq']);
     Route::put('faq/{id}', [FaqController::class, 'put_faq']);
     Route::delete('faq/{id}', [FaqController::class, 'delete_faq']);
 
     Route::post('announcement/post', [AnnController::class, 'post_ann']);
+    Route::get('announcement/{id}', [AnnController::class, 'get_single']);
     //http://127.0.0.1:8000/api/announcement/1?_method=PUT
-    Route::put('announcement/put/{id}', [AnnController::class, 'put_ann']);
+    Route::post('announcement/put/{id}', [AnnController::class, 'put_ann']);
 
     Route::post('signout', [AuthController::class, 'signout']);
 
@@ -65,7 +66,7 @@ Route::middleware('auth:api')->group(function () {
 });
 
 //test
-Route::post('appli', [ServAppliController::class, 'submit_appli']);
+Route::post('appli/post', [ServAppliController::class, 'submit_appli']);
 
 //public end points
 Route::get('org', [OrgController::class, 'get_org']);
@@ -74,7 +75,7 @@ Route::get('org/position', [OrgController::class, 'get_position']);
 
 Route::get('announcement', [AnnController::class, 'get_all']);
 
-Route::post('client_message', [ClientMessageController::class, 'post_msg']);
+Route::post('client_message/post', [ClientMessageController::class, 'post_msg']);
 
 Route::get('faq', [FaqController::class, 'get_all']);
 

@@ -27,7 +27,7 @@ class AnnController extends Controller
     }
 
     public function get_single($id) {
-        $ann = $Announcement::find($id);
+        $ann = Announcement::find($id);
 
         if ($ann) {
             return response()->json([
@@ -73,7 +73,7 @@ class AnnController extends Controller
             ], 422);
         }
 
-        $ann->image_path = $img_id . $nam;
+        $ann->image_path = $img_id . $name;
 
         if ($ann->save()) {
             return response()->json([
@@ -89,6 +89,7 @@ class AnnController extends Controller
     }
 
     public function put_ann(Request $request, $id) {
+        
         $ann = Announcement::find($id);
         $path;
         $name;
@@ -114,8 +115,15 @@ class AnnController extends Controller
             $ann->image_path = $img_id . $name;
         }
 
-        $ann->announcement_title = $request->announcement_title;
-        $ann->announcement_body = $request->announcement_body;
+        echo "It's" . is_null($request->announcement_title);
+
+        if (!is_null($request->announcement_title)) {
+            $ann->announcement_title = $request->announcement_title;
+        }
+        
+        if (!is_null($request->announcement_body)) {
+            $ann->announcement_body = $request->announcement_body;
+        }
 
 
         if ($ann->save()) {
