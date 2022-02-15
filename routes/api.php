@@ -10,6 +10,7 @@ use App\Http\Controllers\ClientMessageController;
 use App\Http\Controllers\ServAppliController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AnnController;
+use App\Http\Controllers\ApplicationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('signout', [AuthController::class, 'signout']);
 
     Route::get('appli', [ServAppliController::class, 'get_all']);
+
+    Route::get('application', [ApplicationController::class, 'get_all']);
+    Route::get('application/{id}', [ApplicationController::class, 'get_all']);
 });
 
 //test
@@ -78,6 +82,8 @@ Route::get('announcement', [AnnController::class, 'get_all']);
 Route::post('client_message/post', [ClientMessageController::class, 'post_msg']);
 
 Route::get('faq', [FaqController::class, 'get_all']);
+
+Route::post('application/post', [ApplicationController::class, 'post_application']);
 
 //invalid access
 Route::get('invalid', function() {

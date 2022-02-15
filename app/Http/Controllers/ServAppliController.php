@@ -108,7 +108,7 @@ class ServAppliController extends Controller
             ], 200);
         } else {
             return response()->json([
-                "success" => true,
+                "success" => false,
                 "message" => "Application is NOT submitted"
             ], 500);
         }
