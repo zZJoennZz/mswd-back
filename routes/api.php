@@ -66,7 +66,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('appli', [ServAppliController::class, 'get_all']);
 
     Route::get('application', [ApplicationController::class, 'get_all']);
-    Route::get('application/{id}', [ApplicationController::class, 'get_all']);
+    Route::get('application/{id}', [ApplicationController::class, 'get_single']);
+    Route::delete('application/delete/{id}', [ApplicationController::class, 'delete_application']);
 });
 
 //test

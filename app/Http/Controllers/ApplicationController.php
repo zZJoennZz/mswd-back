@@ -39,7 +39,7 @@ class ApplicationController extends Controller
     }
 
     public function post_application(Request $request) {
-        $rand = substr(md5(microtime()),rand(0,26),5);
+        $rand = substr(md5(microtime()),rand(0,26),3);
         $app_id =  "SR" . $rand . date("mdyyHis");
 
         if (!$request->hasFile('application_pic') || !$request->hasFile('application_sig')) {
@@ -85,6 +85,26 @@ class ApplicationController extends Controller
                 "success" => false,
                 "message" => "Application is NOT succes"
             ], 500);
+        }
+    }
+
+    public function delete_application($id) {
+        $app = Application::find($id);
+
+        try {
+            if ($app->delete()) {
+                return response()->json([
+                    "success" => true,
+                    "message" => "Application record is deleted"
+                ], 200);
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Application record is NOT deleted"
+                ], 500);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 }
