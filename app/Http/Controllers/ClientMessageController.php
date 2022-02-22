@@ -76,7 +76,6 @@ class ClientMessageController extends Controller
         }
 
         $msg->status = $msg_changes['status'];
-        echo $msg->status . "-" . $msg_changes['status'];
 
         if ($msg->save()) {
             return response()->json([
@@ -87,6 +86,32 @@ class ClientMessageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Status could NOT be updated'
+            ], 500);
+        }
+    }
+
+    public function update_note(Request $request, $id) {
+        $msg_changes = $request->json()->all();
+        $msg = ClientMessage::find($id);
+
+        if (!$msg) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Message could NOT be found'
+            ], 404);
+        }
+
+        $msg->notes = $msg_changes['notes'];
+
+        if ($msg->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Note is updated'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Note could NOT be updated'
             ], 500);
         }
     }

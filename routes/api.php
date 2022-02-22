@@ -11,6 +11,7 @@ use App\Http\Controllers\ServAppliController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AnnController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\OtherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,7 +48,8 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('org/position/{id}', [OrgController::class, 'delete_position']);
 
     Route::put('client_message/put/{id}', [ClientMessageController::class, 'change_status']);
-    Route::delete('client_message/{id}', [ClientMessageController::class, 'delete_msg']);
+    Route::put('client_message/put_note/{id}', [ClientMessageController::class, 'update_note']);
+    Route::delete('client_message/delete/{id}', [ClientMessageController::class, 'delete_msg']);
     Route::get('client_message', [ClientMessageController::class, 'get_all']);
     Route::get('client_message/{id}', [ClientMessageController::class, 'get_msg']);
 
@@ -85,6 +87,8 @@ Route::post('client_message/post', [ClientMessageController::class, 'post_msg'])
 Route::get('faq', [FaqController::class, 'get_all']);
 
 Route::post('application/post', [ApplicationController::class, 'post_application']);
+
+Route::get('dashboard/count', [OtherController::class, 'count_dashboard']);
 
 //invalid access
 Route::get('invalid', function() {
