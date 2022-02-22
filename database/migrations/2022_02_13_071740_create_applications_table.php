@@ -17,7 +17,7 @@ class CreateApplicationsTable extends Migration
             $table->id();
             $table->json("application_data");
             $table->text("application_id");
-            $table->tinyInteger('status');
+            $table->bigInteger('status');
             $table->timestamps();
         });
     }
