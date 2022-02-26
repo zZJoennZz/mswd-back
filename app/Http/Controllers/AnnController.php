@@ -50,13 +50,7 @@ class AnnController extends Controller
 
     //for application form to be posted
     public function post_ann(Request $request) {
-        // $client = new FilestackClient("AXODbcYQsRlaCtzXxRTwgz");
-        // $file_handle = $request->file('announcement_img');
-
-        $filelink = $client->upload($file_handle->getRealPath());
-
-        return response()->json($filelink, 200);
-
+        $res;
         //check if the request payload have a file attached and send response if none
         if (!$request->hasFile('announcement_img')) {
             return response()->json([
@@ -71,7 +65,7 @@ class AnnController extends Controller
         $ann->announcement_body = $request->announcement_body;
 
         //array of allowed file extensions
-        $allowedFileExtension = ['png', 'jpg', 'jpeg', 'gif'];
+        $allowedFileExtension = ['png', 'jpg', 'jpeg', 'gif', 'PNG'];
 
         //store the announcement featured image file to a variable
         $featuredImg = $request->file('announcement_img');
@@ -89,8 +83,29 @@ class AnnController extends Controller
             $img_id =  uniqid("ann", false) . date("mmddyyyHis");
             //get the file original name
             $name = $featuredImg->getClientOriginalName();
-            //save the file to the public folder of laravel framework
-            $path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+            //save the file to ImgBB through their API
+            // $path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+            $contents = file_get_contents($request->file('announcement_img')->getRealPath());
+
+            $image_base64 = base64_encode($contents);
+            //dd($image_base64);
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            $imgToUpload = array('image' => $image_base64, 'name' => $name . $img_id);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $imgToUpload);
+
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                return response()->json([
+                    "success" => false,
+                    "message" => curl_error($ch)
+                ], 400);
+            }
+            curl_close($ch);
+            $res = json_decode($result);
         } else {
             //send invalid file format response if the check variable contains false
             return response()->json([
@@ -100,7 +115,8 @@ class AnnController extends Controller
         }
 
         //add the image file name to table field
-        $ann->image_path = $img_id . $name;
+        
+        $ann->image_path = $res->data->url;
 
         //save the record to the database and send a success or fail message as response to frontend website
         if ($ann->save()) {
@@ -118,6 +134,7 @@ class AnnController extends Controller
 
     //updating a announcement post
     public function put_ann(Request $request, $id) {
+        $res;
         //find the announcement you were going to edit using the id from route path
         $ann = Announcement::find($id);
         //initiate path and name variable
@@ -138,7 +155,28 @@ class AnnController extends Controller
             //check if the check variable is true or false then send the appropriate response
             if ($check) { 
                 $name = $featuredImg->getClientOriginalName();
-                $path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+                //$path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+                $contents = file_get_contents($request->file('announcement_img')->getRealPath());
+
+                $image_base64 = base64_encode($contents);
+                //dd($image_base64);
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                $imgToUpload = array('image' => $image_base64, 'name' => $name . $img_id);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $imgToUpload);
+
+                $result = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    return response()->json([
+                        "success" => false,
+                        "message" => curl_error($ch)
+                    ], 400);
+                }
+                curl_close($ch);
+                $res = json_decode($result);
             } else {
                 return response()->json([
                     "success" => false,
@@ -146,7 +184,7 @@ class AnnController extends Controller
                 ], 422);
             }
             //save the image file name to the field
-            $ann->image_path = $img_id . $name;
+            $ann->image_path = $res->data->url;
         }
 
         //echo "It's" . is_null($request->announcement_title);

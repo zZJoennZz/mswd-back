@@ -19,7 +19,7 @@ class CreateClientMessagesTable extends Migration
             $table->text("full_name");
             $table->text("subject");
             $table->text("message");
-            $table->text("notes")->default("N/A");
+            $table->text("notes");
             $table->text("status");
             $table->timestamps();
         });
