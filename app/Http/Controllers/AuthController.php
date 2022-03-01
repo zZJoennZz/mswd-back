@@ -29,6 +29,65 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
     }
+    
+    //update user 
+    public function update(Request $request) {
+        $userId = $request->user()->id;
+        $user = User::find($userId);
+
+        if (!is_null($request->name)) {
+            $user->name = $request->name;
+        }
+
+        if (!is_null($request->email)) {
+            $user->email = $request->email;
+        }
+
+        if (!is_null($request->password)) {
+            $user->password = bcrypt($request->password);
+        }
+
+        if ($user->save()) {
+            return response()->json([
+                "success" => true,
+                "message" => "User changes successfully saved"
+            ], 200);
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "User changes NOT saved"
+            ], 401);
+        }
+    }
+
+    //update user 
+    public function update_user(Request $request, $id) {
+        $user = User::find($id);
+
+        if (!is_null($request->name)) {
+            $user->name = $request->name;
+        }
+
+        if (!is_null($request->email)) {
+            $user->email = $request->email;
+        }
+
+        if (!is_null($request->password)) {
+            $user->password = bcrypt($request->password);
+        }
+
+        if ($user->save()) {
+            return response()->json([
+                "success" => true,
+                "message" => "User changes successfully saved"
+            ], 200);
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "User changes NOT saved"
+            ], 401);
+        }
+    }
 
     //register function
     public function signup(Request $request) {
@@ -84,14 +143,63 @@ class AuthController extends Controller
         //dd($request->header());
         //check if the token is valid
         if ($is_logged_in) {
+            $userId = auth()->user();
             return response()->json([
                 'success' => true,
                 'message' => 'Token have access',
+                'id' => $request->user()->id
             ], 200);
         } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Your token have no access'
+            ], 401);
+        }
+    }
+
+    //get user profile
+    public function getProfile(Request $request) {
+        $userId = $request->user()->id;
+        $userName = $request->user()->name;
+        $userEmail = $request->user()->email;
+        return response()->json([
+            'success' => true,
+            'id' => $userId,
+            'email' => $userEmail,
+            'name' => $userName,
+        ], 200);
+    }
+
+    //get all users
+    public function get_all() {
+        $users = User::get();
+
+        if ($users) {
+            return response()->json([
+                "success" => true,
+                "data" => $users
+            ], 200);
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "Could NOT get users"
+            ], 401);
+        }
+    }
+
+    //get single user
+    public function get_single($id) {
+        $user = User::find($id);
+
+        if ($user) {
+            return response()->json([
+                "success" => true,
+                "data" => $user
+            ], 200);
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "User cannot be found"
             ], 401);
         }
     }

@@ -28,11 +28,17 @@ use App\Http\Controllers\OtherController;
 //     return $request->user();
 // });
 
+// Route::post('validate', [AuthController::class, 'validateToken']);
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
-Route::post('signup', [AuthController::class, 'signup']);
-Route::post('validate', [AuthController::class, 'validateToken']);
+
 Route::middleware('auth:api')->group(function () {
-    Route::resource('blog', BlogController::class);
+    Route::post('validate', [AuthController::class, 'validateToken']);
+    Route::post('signup', [AuthController::class, 'signup']);
+    Route::get('getprofile', [AuthController::class, 'getProfile']);
+    Route::put('updateprofile', [AuthController::class, 'update']);
+    Route::get('getall', [AuthController::class, 'get_all']);
+    Route::get('getsingle/{id}', [AuthController::class, 'get_single']);
+    Route::put('updatesingle/{id}', [AuthController::class, 'update_user']);
 
     Route::post('org/division/post', [OrgController::class, 'post_division']);
     Route::put('org/division/put/{id}', [OrgController::class, 'put_division']);
@@ -88,6 +94,7 @@ Route::post('client_message/post', [ClientMessageController::class, 'post_msg'])
 Route::get('faq', [FaqController::class, 'get_all']);
 
 Route::post('application/post', [ApplicationController::class, 'post_application']);
+Route::post('test', [ApplicationController::class, 'test_post']);
 
 Route::get('dashboard/count', [OtherController::class, 'count_dashboard']);
 
