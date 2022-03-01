@@ -2815,7 +2815,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "pCloud\\": "lib/"
+                    "pCloud\\": "lib/pCloud"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
