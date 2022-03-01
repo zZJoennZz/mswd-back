@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php');
+// require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php');
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
