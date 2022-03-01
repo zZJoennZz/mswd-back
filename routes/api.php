@@ -31,8 +31,8 @@ use App\Http\Controllers\OtherController;
 // Route::post('validate', [AuthController::class, 'validateToken']);
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
 
-Route::post('signup', [AuthController::class, 'signup']);
 Route::middleware('auth:api')->group(function () {
+    Route::post('signup', [AuthController::class, 'signup']);
     Route::post('validate', [AuthController::class, 'validateToken']);
     Route::get('getprofile', [AuthController::class, 'getProfile']);
     Route::put('updateprofile', [AuthController::class, 'update']);
