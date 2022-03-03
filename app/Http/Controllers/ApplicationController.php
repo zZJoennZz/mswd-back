@@ -223,6 +223,9 @@ class ApplicationController extends Controller
 
     //delete an application
     public function delete_application($id) {
+        //find the application files for this specific application
+        $appFiles = ApplicationFiles::where("app_id", $id)->delete();
+
         //find the application you wanted to delete
         $app = Application::find($id);
 
