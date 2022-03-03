@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php');
+//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
@@ -65,7 +65,7 @@ class ApplicationController extends Controller
                 'id' => $files->id, 
                 'app_id' => $files->app_id,
                 'file_name' => $files->file_name . " - " . $fileName,
-                'file_url' => $res
+                'file_url' => $res->link
             ));
         }
 
