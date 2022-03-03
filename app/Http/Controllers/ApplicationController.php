@@ -53,9 +53,9 @@ class ApplicationController extends Controller
         foreach($app_files as $files) {
             $fileId = json_decode($files->file)->metadata->fileid;
             $fileName = json_decode($files->file)->metadata->name;
-            $params = array([
+            $params = array(
                 'fileid' => $fileId
-            ]);
+            );
             $req = new pCloud\Request($pCloudApp);
             $res = $req->get($method, $params);
             
@@ -65,7 +65,7 @@ class ApplicationController extends Controller
                 'id' => $files->id, 
                 'app_id' => $files->app_id,
                 'file_name' => $files->file_name . " - " . $fileName,
-                'file_url' => $fileURL
+                'file_url' => $res
             ));
         }
 
