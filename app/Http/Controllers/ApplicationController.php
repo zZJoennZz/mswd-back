@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php');
+//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php');
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
@@ -48,13 +48,18 @@ class ApplicationController extends Controller
         $pcloudFile = new pCloud\File($pCloudApp);
         
         $method = "getfilepublink";
-
+        
         $appFiles = [];
         foreach($app_files as $files) {
             $fileId = json_decode($files->file)->metadata->fileid;
             $fileName = json_decode($files->file)->metadata->name;
-
-            $fileURL = $pcloudFile->getLink($fileId);
+            $params = array([
+                'fileid' => $fileId
+            ]);
+            $req = new pCloud\Request($pCloudApp);
+            $res = $req->get($method, $params);
+            
+            
 
             array_push($appFiles, array(
                 'id' => $files->id, 
