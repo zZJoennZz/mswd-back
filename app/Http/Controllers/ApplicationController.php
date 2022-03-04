@@ -158,7 +158,7 @@ class ApplicationController extends Controller
         //save the records then send response and application ID for tracking
         if ($app->save()) {
             //upload 1x1 pic
-            $fileMetaData = $pcloudFile->upload($application_pic->getRealPath(), $folder_id, $app_id . $application_pic->getClientOriginalName());
+            $fileMetaData = $pcloudFile->upload($application_pic->getRealPath(), $folder_id, $app_id . rand(1,1000) .$application_pic->getClientOriginalName());
 
             $app_pic = new ApplicationFiles;
             $app_pic->app_id = $app->id;
@@ -224,6 +224,23 @@ class ApplicationController extends Controller
     //delete an application
     public function delete_application($id) {
         //find the application files for this specific application
+        $appFileMeta = ApplicationFiles::where("app_id", $id)->get();
+
+        $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
+        $locationid = 1;
+        $folder_id = 12362338034;
+        
+        $pCloudApp = new pCloud\App();
+        $pCloudApp->setAccessToken($access_token);
+        $pCloudApp->setLocationId($locationid);
+        
+        foreach($appFileMeta as $file) {
+            $pcloudFile = new pCloud\File($pCloudApp);
+
+            $fileId = json_decode($file->file)->metadata->fileid;
+            $pcloudFile->delete($fileId);
+        }
+        
         $appFiles = ApplicationFiles::where("app_id", $id)->delete();
 
         //find the application you wanted to delete
