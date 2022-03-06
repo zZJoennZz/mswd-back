@@ -76,6 +76,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('application', [ApplicationController::class, 'get_all']);
     Route::get('application/{id}', [ApplicationController::class, 'get_single']);
     Route::delete('application/delete/{id}', [ApplicationController::class, 'delete_application']);
+    Route::post('application/status/post', [ApplicationController::class,'post_app_status']);
+
+    Route::get('dashboard/count', [OtherController::class, 'count_dashboard']);
 });
 
 //test
@@ -96,7 +99,8 @@ Route::get('faq', [FaqController::class, 'get_all']);
 Route::post('application/post', [ApplicationController::class, 'post_application']);
 Route::post('test', [ApplicationController::class, 'test_post']);
 
-Route::get('dashboard/count', [OtherController::class, 'count_dashboard']);
+
+Route::get('track/{app_id}', [ApplicationController::class, 'get_app_status']);
 
 //invalid access
 Route::get('invalid', function() {

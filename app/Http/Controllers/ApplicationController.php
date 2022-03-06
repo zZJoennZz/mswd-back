@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 //require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
+use App\Models\ApplicationTracker;
 use pCloud;
 use Mail;
 
@@ -69,12 +71,19 @@ class ApplicationController extends Controller
             ));
         }
 
+        $app_status = DB::table('application_trackers')
+            ->leftjoin('applications', 'applications.id', '=', 'application_trackers.app_id')
+            ->select('application_trackers.*', 'applications.application_id')
+            ->where('application_trackers.app_id', $id)
+            ->get();
+
         //send response to frontend
         try {
             return response()->json([
                 "success" => true,
                 "data" => $app,
-                "files" => $appFiles
+                "files" => $appFiles,
+                "app_status" => $app_status
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -208,6 +217,18 @@ class ApplicationController extends Controller
 
             }
             
+            $app_status = new ApplicationTracker;
+            $app_status->app_id = $app->id;
+            $app_status->statusMsg = "Application submitted on " . $app->created_at;
+            $app_status->status = 0;
+
+            if (!$app_status->save()) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Application is NOT successful"
+                ], 500);
+            }
+
             return response()->json([
                 "success" => true,
                 "message" => "Application success",
@@ -216,7 +237,7 @@ class ApplicationController extends Controller
         } else {
             return response()->json([
                 "success" => false,
-                "message" => "Application is NOT success"
+                "message" => "Application is NOT successful"
             ], 500);
         }
     }
@@ -266,6 +287,85 @@ class ApplicationController extends Controller
                 "message" => $th
             ], 500);
         }
+    }
+
+    public function get_app_status($app_id) {
+        $app_status = DB::table('application_trackers')
+            ->leftjoin('applications', 'applications.id', '=', 'application_trackers.app_id')
+            ->select('application_trackers.*', 'applications.application_id')
+            ->where('applications.application_id', $app_id)
+            ->get();
+
+        if (is_null($app_status) || $app_status === []) {
+            return response()->json([
+                "success" => false,
+                "message" => "Application status could NOT be fetched"
+            ], 500);
+        } 
+
+        return response()->json([
+            "success" => true,
+            "data" => $app_status
+        ], 200);
+    }
+
+    public function post_app_status(Request $request) {
+        $status_count = DB::table('application_trackers')
+            ->where('app_id', $request->app_id)
+            ->count();
+
+        if ($status_count === 3) {
+            return response()->json([
+                "success" => false,
+                "message" => "You CANNOT add more status update"
+            ]);
+        }
+
+        if ($status_count === 2) {
+            $status = new ApplicationTracker;
+            $status->app_id = $request->app_id;
+            $status->statusMsg = $request->statusMsg;
+            $status->status = $request->status;
+
+            $app = Application::find($request->app_id);
+            $app->status = $request->status;
+
+            if ($status->save() && $app->save()) {
+                return response()->json([
+                    "success" => true,
+                    "message" => "Application status updated"
+                ], 200);
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Application status NOT updated"
+                ], 500);
+            }
+        }
+
+        if ($status_count === 1) {
+            $status = new ApplicationTracker;
+            $status->app_id = $request->app_id;
+            $status->statusMsg = $request->statusMsg;
+            $status->status = 1;
+
+            if ($status->save()) {
+                return response()->json([
+                    "success" => true,
+                    "message" => "Application status updated"
+                ], 200);
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Application status NOT updated"
+                ], 500);
+            }
+        }
+
+        return response()->json([
+            "success" => false,
+            "message" => "Something went wrong."
+        ], 500);
     }
 
     public function test_post(Request $request) { 
