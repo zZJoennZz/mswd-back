@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Application;
@@ -263,6 +263,8 @@ class ApplicationController extends Controller
         }
         
         $appFiles = ApplicationFiles::where("app_id", $id)->delete();
+
+        $appTrackers = ApplicationTracker::where("app_id", $id)->delete();
 
         //find the application you wanted to delete
         $app = Application::find($id);

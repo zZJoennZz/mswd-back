@@ -125,10 +125,17 @@ class ClientMessageController extends Controller
                 'message' => 'Client message could NOT be found'
             ], 401);
         } else {
-            return response()->json([
-                'success' => true,
-                'message' => 'Client message deleted'
-            ], 200);
+            if ($msg->delete()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Client message deleted'
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Client message NOT deleted'
+                ], 401);
+            }
         }
     }
 
