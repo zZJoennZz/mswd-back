@@ -17,7 +17,7 @@ class OrgController extends Controller
             ->leftjoin('org_people', 'org_charts.person_id', '=', 'org_people.id')
             ->leftjoin('org_positions', 'org_charts.position_id', '=', 'org_positions.id')
             ->leftjoin('org_divisions', 'org_charts.division_id', '=', 'org_divisions.id')
-            ->select('org_charts.id', 'org_charts.under_of', 'org_divisions.id as division_id', 'org_people.first_name', 'org_people.middle_initial', 'org_people.last_name', 'org_people.suffix', 'org_positions.position_name', 'org_divisions.division_name', 'org_divisions.sub_division_of', 'org_divisions.order')
+            ->select('org_charts.id', 'org_charts.under_of', 'org_divisions.id as division_id', 'org_people.first_name', 'org_people.middle_initial', 'org_people.last_name', 'org_people.suffix', 'org_positions.position_name', 'org_divisions.division_name', 'org_divisions.sub_division_of', 'org_divisions.order', 'org_charts.created_at', 'org_charts.updated_at')
             ->get();
         
         if (!$org) {
@@ -30,6 +30,129 @@ class OrgController extends Controller
                 'success' => true,
                 'data' => $org
             ], 200);
+        }
+    }
+
+    public function get_org_all() {
+        $org = OrChart::all();
+
+        if (!$org) {
+            return response()->json([
+                'success' => false,
+                'message' => "Organization chart cannot be fetched"
+            ], 500);
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => $org
+            ], 200);
+        }
+    }
+
+    public function get_single_org($id) {
+        $org = OrgChart::find($id);
+
+        if (!$org) {
+            return response()->json([
+                'success' => false,
+                'message' => "Organization entry cannot be fetched"
+            ], 401);
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => $org
+            ]);
+        }
+    }
+
+    public function post_org(Request $request) {
+        $data = $request->json()->all();
+        $new_org = new OrgChart;
+
+        $this->validate($request, [
+            'person_id' => 'required',
+            'position_id' => 'required',
+            'division_id' => 'required'
+        ]);
+
+        $new_org->person_id = $data['person_id'];
+        $new_org->position_id = $data['position_id'];
+        $new_org->division_id = $data['division_id'];
+        $new_org->under_of = 0;
+        $new_org->order = 0;
+
+        if ($new_org->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Organization chart entry is saved successfully'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Organization chart entry is NOT saved'
+            ], 400);
+        }
+    }
+
+    public function put_org(Request $request, $id) {
+        $data = $request->json()->all();
+        $org = OrgChart::find($id);
+
+        if (!is_null($data['person_id']) && intval($data['person_id']) !== 0) {
+            $org->person_id = intval($data['person_id']);
+        }
+        if (!is_null($data['position_id']) && intval($data['position_id']) !== 0) {
+            $org->position_id = intval($data['position_id']);
+        }
+        if (!is_null($data['division_id']) && intval($data['division_id']) !== 0) {
+            $org->division_id = intval($data['division_id']);
+        }
+
+        // return response()->json([
+        //     'data' => intval($data['position_id']),
+        //     'org' => $org
+        // ], 200);
+
+        if ($org->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Organization chart entry is saved successfully'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Organization chart entry is NOT saved'
+            ], 400);
+        }
+    }
+
+    public function delete_org($id) {
+        $org = OrgChart::find($id);
+
+        if (!$org) {
+            return response()->json([
+                'success' => false,
+                'message' => "Entry cannot be found"
+            ], 404);
+        }
+
+        try {
+            if ($org->delete()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Entry is deleted"
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Entry cannot be deleted"
+                ], 401);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Entry cannot be deleted"
+            ], 401);
         }
     }
     #endregion
@@ -180,7 +303,15 @@ class OrgController extends Controller
             ], 404);
         }
 
-        $updated = $person->fill($new_person)->save();
+        // $updated = $person->fill($new_person)->save();
+        if (!is_null($new_person['first_name'])) { $person->first_name = $new_person['first_name']; }
+        if (!is_null($new_person['middle_initial'])) { $person->middle_initial = $new_person['middle_initial']; }
+        if (!is_null($new_person['last_name'])) { $person->last_name = $new_person['last_name']; }
+        if (!is_null($new_person['suffix'])) { $person->suffix = $new_person['suffix']; }
+        if ($new_person['gender'] !== 3) { $person->gender = $new_person['gender']; }
+        if (!is_null($new_person['birthday'])) { $person->birthday = $new_person['birthday']; }
+
+        $updated = $person->save();
 
         if ($updated) {
             return response()->json([
@@ -204,18 +335,25 @@ class OrgController extends Controller
                 'message' => "Organization person could NOT be found"
             ], 404);
         }
-
-        if ($person->delete()) {
-            return response()->json([
-                'success' => true,
-                'message' => "Organization person successfully deleted"
-            ], 200);
-        } else {
+        try {
+            if ($person->delete()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Organization person successfully deleted"
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Organization person is NOT deleted"
+                ], 200);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
                 'success' => false,
                 'message' => "Organization person is NOT deleted"
-            ], 500);
+            ], 200);
         }
+        
     }
     #endregion
 

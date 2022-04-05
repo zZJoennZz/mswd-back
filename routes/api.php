@@ -53,6 +53,11 @@ Route::middleware('auth:api')->group(function () {
     Route::put('org/position/put/{id}', [OrgController::class, 'put_position']);
     Route::delete('org/position/delete/{id}', [OrgController::class, 'delete_position']);
 
+    Route::post('org/chart/post', [OrgController::class, 'post_org']);
+    Route::get('org/chart/{id}', [OrgController::class, 'get_single_org']);
+    Route::put('org/chart/put/{id}', [OrgController::class, 'put_org']);
+    Route::delete('org/chart/delete/{id}', [OrgController::class, 'delete_org']);
+
     Route::put('client_message/put/{id}', [ClientMessageController::class, 'change_status']);
     Route::put('client_message/put_note/{id}', [ClientMessageController::class, 'update_note']);
     Route::delete('client_message/delete/{id}', [ClientMessageController::class, 'delete_msg']);
