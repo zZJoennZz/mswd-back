@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Notification;
 use Illuminate\Http\Request;
 use App\Models\ClientMessage;
+
+use Illuminate\Support\Facades\Mail;
 
 class ClientMessageController extends Controller
 {
@@ -52,6 +55,7 @@ class ClientMessageController extends Controller
         $new_msg->status = 0;
 
         if ($new_msg->save()) {
+            Mail::to($msg['email_address'])->send(new Notification($msg['email_address']));
             return response()->json([
                 'success' => true,
                 'message' => 'Message is submitted'
