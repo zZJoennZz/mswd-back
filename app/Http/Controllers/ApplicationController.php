@@ -1,14 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
+
 //require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+use App\Mail\AppNotif;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
 use App\Models\ApplicationTracker;
 use pCloud;
-use Mail;
 
 class ApplicationController extends Controller
 {
@@ -95,6 +97,8 @@ class ApplicationController extends Controller
 
     //post application
     public function post_application(Request $request) {
+        $getEmail = json_decode($request->application_data, true)['email_address'];
+
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
         $folder_id = 12362338034;
@@ -155,14 +159,6 @@ class ApplicationController extends Controller
                 ], 422);
             }
         }
-
-        //store the original name to variables
-        // $pic_name = $application_pic->getClientOriginalName();
-        // $sig_name = $application_sig->getClientOriginalName();
-
-        //store the path to variables
-        // $pic_path = $application_pic->storeAs('public/d0czx/' . $app_id, $pic_name);
-        // $sig_path = $application_sig->storeAs('public/d0czx/' . $app_id, $sig_name);
 
         //save the records then send response and application ID for tracking
         if ($app->save()) {
@@ -228,6 +224,8 @@ class ApplicationController extends Controller
                     "message" => "Application is NOT successful"
                 ], 500);
             }
+
+            Mail::to($getEmail)->send(new AppNotif($getEmail, $app_id));
 
             return response()->json([
                 "success" => true,

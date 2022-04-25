@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AppNotif;
 use Illuminate\Http\Request;
 use App\Models\ServAppli;
+use Illuminate\Support\Facade\Mail;
 
 class ServAppliController extends Controller
 {
@@ -101,6 +103,7 @@ class ServAppliController extends Controller
         }
 
         if ($is_saved) {
+            Mail::to($request->email_address)->send(new AppNotif($request->email_address));
             return response()->json([
                 "success" => true,
                 "message" => "Application successfully submitted",

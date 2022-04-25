@@ -7,19 +7,21 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class Notification extends Mailable
+class AppNotif extends Mailable
 {
     use Queueable, SerializesModels;
-    
+    public $email;
+    public $appId;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($email)
+    public function __construct($email, $appId)
     {
         //
         $this->email = $email;
+        $this->appId = $appId;
     }
 
     /**
@@ -30,7 +32,8 @@ class Notification extends Mailable
     public function build()
     {
         return $this
-            ->subject('MSWDO: We received your inquiry!')
-            ->markdown('emails.notifications');
+            ->subject('MSWDO: We received your application!')
+            ->with(['appId' => $this->appId])
+            ->markdown('emails.appnotifs');
     }
 }
