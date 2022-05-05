@@ -12,6 +12,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AnnController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\OtherController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,12 @@ use App\Http\Controllers\OtherController;
 
 // Route::post('validate', [AuthController::class, 'validateToken']);
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
+
+// Route::post('user/login', [ClientController::class, 'signin']);
+// Route::post('user/register', [ClientController::class, 'signup']);
+// Route::group(['prefix' => 'client', 'middleware' => ['auth:clientapi', 'scopes:client']], function () {
+//     Route::get('hellotest', [ClientController::class, 'signin']);
+// });
 
 Route::middleware('auth:api')->group(function () {
     Route::post('signup', [AuthController::class, 'signup']);

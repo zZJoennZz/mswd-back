@@ -11,6 +11,10 @@ class OtherController extends Controller
 {
     //
     public function count_dashboard() {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $inq = ClientMessage::all()->count();
         $app = Application::all()->count();
         $app_proce = DB::table('applications')->WHERE('status', 0)->count();

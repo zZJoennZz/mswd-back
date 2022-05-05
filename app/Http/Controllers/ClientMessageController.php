@@ -12,6 +12,10 @@ class ClientMessageController extends Controller
 {
     //
     public function get_all() {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $msgs = ClientMessage::all();
         
         if (!$msgs) {
@@ -28,6 +32,10 @@ class ClientMessageController extends Controller
     }
 
     public function get_msg($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $msg = ClientMessage::find($id);
 
         if (!$msg) {
@@ -69,6 +77,10 @@ class ClientMessageController extends Controller
     }
 
     public function change_status(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $msg_changes = $request->json()->all();
         $msg = ClientMessage::find($id);
 
@@ -95,6 +107,10 @@ class ClientMessageController extends Controller
     }
 
     public function update_note(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $msg_changes = $request->json()->all();
         $msg = ClientMessage::find($id);
 
@@ -121,6 +137,10 @@ class ClientMessageController extends Controller
     }
 
     public function delete_msg($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $msg = ClientMessage::find($id);
 
         if (!$msg) {

@@ -50,6 +50,10 @@ class AnnController extends Controller
 
     //for application form to be posted
     public function post_ann(Request $request) {
+        if (auth()->user()['is_admin'] !== 1) return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $res;
         //check if the request payload have a file attached and send response if none
         if (!$request->hasFile('announcement_img')) {
@@ -134,6 +138,10 @@ class AnnController extends Controller
 
     //updating a announcement post
     public function put_ann(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $res;
         //find the announcement you were going to edit using the id from route path
         $ann = Announcement::find($id);
@@ -214,6 +222,10 @@ class AnnController extends Controller
 
     //delete function for announcements
     public function delete_ann($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //find the announcement you wanted to delete
         $ann = Announcement::find($id);
 

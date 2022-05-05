@@ -17,7 +17,7 @@ class CreateApplicationFilesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('app_id');
             $table->text('file_name');
-            $table->binary('file');
+            $table->text('file');
             $table->timestamps();
 
             $table->foreign('app_id')->references('id')->on('applications');

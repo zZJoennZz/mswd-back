@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use App\Mail\AppNotif;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +16,10 @@ class ApplicationController extends Controller
 {
     //get all application records
     public function get_all() {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //store all application records to $app variable
         $apps = Application::all();
 
@@ -36,6 +40,10 @@ class ApplicationController extends Controller
 
     //get single record of application
     public function get_single($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //put credentials for the cloud server
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
@@ -97,6 +105,11 @@ class ApplicationController extends Controller
 
     //post application
     public function post_application(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
+
         $getEmail = json_decode($request->application_data, true)['email_address'];
 
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
@@ -242,6 +255,10 @@ class ApplicationController extends Controller
 
     //delete an application
     public function delete_application($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //find the application files for this specific application
         $appFileMeta = ApplicationFiles::where("app_id", $id)->get();
 

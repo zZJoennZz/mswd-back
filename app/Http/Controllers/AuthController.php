@@ -10,7 +10,7 @@ use Laravel\Passport\RefreshTokenRepository;
 
 class AuthController extends Controller
 {
-    //sign in function
+    //admin signin function
     public function signin(Request $request) {
 
         //store the request payload to data array
@@ -23,7 +23,9 @@ class AuthController extends Controller
         if (auth()->attempt($data)) {
             //generate token for the user then send it as the response
             $token = auth()->user()->createToken(env("SEACREAT_KIEY"))->accessToken;
-            return response()->json(['token' => $token], 200);
+            $isAdmin = auth()->user()['is_admin'];
+
+            return response()->json(['token' => $token, 'isAdmin' => $isAdmin,], 200);
         } else {
             //return error
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -102,7 +104,8 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'is_admin' => 1
         ]);
 
         //generate token for the user
@@ -143,11 +146,15 @@ class AuthController extends Controller
         //dd($request->header());
         //check if the token is valid
         if ($is_logged_in) {
+            if (auth()->user()['is_admin'] !== "1") return response()->json([
+                "success" => false,
+                "message" => "You have NO authorization here"
+            ], 401);
             $userId = auth()->user();
             return response()->json([
                 'success' => true,
                 'message' => 'Token have access',
-                'id' => $request->user()->id
+                'id' => $request->user()->id,
             ], 200);
         } else {
             return response()->json([

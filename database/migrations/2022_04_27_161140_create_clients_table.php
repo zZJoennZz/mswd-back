@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrgPeopleTable extends Migration
+class CreateClientsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,14 @@ class CreateOrgPeopleTable extends Migration
      */
     public function up()
     {
-        Schema::create('org_people', function (Blueprint $table) {
+        Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            $table->text('first_name');
-            $table->text('middle_initial');
-            $table->text('last_name');
-            $table->text('suffix');
-            $table->text('gender');
-            $table->date('birthday');
-            $table->text('image');
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->string('is_admin')->default('0');
+            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -33,6 +32,6 @@ class CreateOrgPeopleTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('org_people');
+        Schema::dropIfExists('clients');
     }
 }

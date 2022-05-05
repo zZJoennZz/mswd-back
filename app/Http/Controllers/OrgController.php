@@ -66,6 +66,10 @@ class OrgController extends Controller
     }
 
     public function post_org(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $data = $request->json()->all();
         $new_org = new OrgChart;
 
@@ -95,6 +99,10 @@ class OrgController extends Controller
     }
 
     public function put_org(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $data = $request->json()->all();
         $org = OrgChart::find($id);
 
@@ -127,6 +135,10 @@ class OrgController extends Controller
     }
 
     public function delete_org($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $org = OrgChart::find($id);
 
         if (!$org) {
@@ -183,6 +195,10 @@ class OrgController extends Controller
     }
 
     public function post_division(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $data = $request->json()->all();
         $new_division = new OrgDivision;
         $new_division->division_name = $data['division_name'];
@@ -203,6 +219,10 @@ class OrgController extends Controller
     }
 
     public function put_division(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $data = $request->json()->all();
         $division = OrgDivision::find($id);
         
@@ -229,6 +249,10 @@ class OrgController extends Controller
     }
 
     public function delete_division($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $division = OrgDivision::find($id);
 
         if (!$division) {
@@ -254,6 +278,11 @@ class OrgController extends Controller
 
     #region Org Person
     public function get_person() {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
+
         $person = OrgPerson::all();
 
         if (!$person) {
@@ -270,6 +299,10 @@ class OrgController extends Controller
     }
 
     public function post_person(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $person = $request->json()->all();
         $new_person = new OrgPerson;
         $new_person->first_name = $person['first_name'];
@@ -293,6 +326,10 @@ class OrgController extends Controller
     }
 
     public function put_person(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $new_person = $request->json()->all();
         $person = OrgPerson::find($id);
 
@@ -327,6 +364,10 @@ class OrgController extends Controller
     }
 
     public function delete_person($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $person = OrgPerson::find($id);
 
         if (!$person) {
@@ -375,6 +416,10 @@ class OrgController extends Controller
     }
 
     public function post_position(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $position = $request->json()->all();
         $new_position = new OrgPosition;
         $new_position->position_name = $position['position_name'];
@@ -394,6 +439,10 @@ class OrgController extends Controller
     }
 
     public function put_position(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         $new_position = $request->json()->all();
         $position = OrgPosition::find($id);
 
@@ -420,6 +469,11 @@ class OrgController extends Controller
     }
 
     public function delete_position($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
+
         $position = OrgPosition::find($id);
 
         if (!$position) {

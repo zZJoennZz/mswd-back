@@ -28,6 +28,10 @@ class FaqController extends Controller
 
     //get single faq
     public function get_single($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //find using id
         $faq = Faq::find($id);
 
@@ -47,6 +51,10 @@ class FaqController extends Controller
 
     //post new faq
     public function post_faq(Request $request) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //get the payload data
         $data = $request->json()->all();
 
@@ -72,6 +80,10 @@ class FaqController extends Controller
 
     //put faq changes
     public function put_faq(Request $request, $id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //store payload data
         $data = $request->json()->all();
 
@@ -105,6 +117,10 @@ class FaqController extends Controller
 
     //delete a faq
     public function delete_faq($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
         //find the faq you wanted to delete
         $faq = Faq::find($id);
 
