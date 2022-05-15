@@ -31,7 +31,6 @@ use App\Http\Controllers\ClientController;
 
 // Route::post('validate', [AuthController::class, 'validateToken']);
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
-
 // Route::post('user/login', [ClientController::class, 'signin']);
 // Route::post('user/register', [ClientController::class, 'signup']);
 // Route::group(['prefix' => 'client', 'middleware' => ['auth:clientapi', 'scopes:client']], function () {
@@ -39,13 +38,18 @@ Route::post('signin', [AuthController::class, 'signin'])->name('login');
 // });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('getHistory', [ApplicationController::class, 'get_user_app_history']);
+
     Route::post('signup', [AuthController::class, 'signup']);
     Route::post('validate', [AuthController::class, 'validateToken']);
+    Route::post('validate-user', [AuthController::class, 'validateUserToken']);
     Route::get('getprofile', [AuthController::class, 'getProfile']);
     Route::put('updateprofile', [AuthController::class, 'update']);
     Route::get('getall', [AuthController::class, 'get_all']);
     Route::get('getsingle/{id}', [AuthController::class, 'get_single']);
     Route::put('updatesingle/{id}', [AuthController::class, 'update_user']);
+
+    Route::post('application/post', [ApplicationController::class, 'post_application']);
 
     Route::post('org/division/post', [OrgController::class, 'post_division']);
     Route::put('org/division/put/{id}', [OrgController::class, 'put_division']);
@@ -108,7 +112,7 @@ Route::post('client_message/post', [ClientMessageController::class, 'post_msg'])
 
 Route::get('faq', [FaqController::class, 'get_all']);
 
-Route::post('application/post', [ApplicationController::class, 'post_application']);
+
 Route::post('test', [ApplicationController::class, 'test_post']);
 
 

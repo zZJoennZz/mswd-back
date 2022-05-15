@@ -164,6 +164,27 @@ class AuthController extends Controller
         }
     }
 
+    public function validateUserToken(Request $request) {
+        $is_logged_in = auth()->guard('api')->check();
+        if ($is_logged_in) {
+            if (auth()->user()['is_admin'] !== "0") return response()->json([
+                "success" => false,
+                "message" => "You are NOT allowed here"
+            ], 401);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Token have access',
+                'name' => auth()->user()['name'],
+                'email' => auth()->user()['email']
+            ], 200);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Your token have no access'
+        ], 401);
+    }
+
     //get user profile
     public function getProfile(Request $request) {
         $userId = $request->user()->id;

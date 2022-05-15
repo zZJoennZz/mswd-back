@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use App\Mail\AppNotif;
+use App\Mail\AppApprove;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Application;
 use App\Models\ApplicationFiles;
 use App\Models\ApplicationTracker;
+use App\Models\UserApplicationHistory;
 use pCloud;
 
 class ApplicationController extends Controller
@@ -105,12 +107,36 @@ class ApplicationController extends Controller
 
     //post application
     public function post_application(Request $request) {
-        if (auth()->user()['is_admin'] !== "1") return response()->json([
+        if (auth()->user()['is_admin'] === "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
 
         $getEmail = json_decode($request->application_data, true)['email_address'];
+        $getAppType = json_decode($request->application_data, true)['appliType'];
+
+        $checkRecords = DB::table('user_application_histories')
+                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+                        ->where('applications.status', '=', 0)
+                        ->select('applications.id', 'applications.application_data')
+                        ->get();
+
+        if (count($checkRecords) >= 1) {
+            $getAppIds = array();
+
+            for ($i = 0; $i < count($checkRecords); $i++) {
+                array_push($getAppIds, json_decode($checkRecords[$i]->application_data, true)['appliType']);
+            }
+
+
+            $isExists = in_array($getAppType, $getAppIds);
+            if ($isExists) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "You still have existing application"
+                ], 400);
+            }
+        }
 
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
@@ -159,7 +185,7 @@ class ApplicationController extends Controller
             ], 422);
         }
 
-        $allowedFileExtension = ['pdf'];
+        $allowedFileExtension = ['pdf', 'PDF'];
 
         $docs = $request->file('docs');
         
@@ -238,6 +264,18 @@ class ApplicationController extends Controller
                 ], 500);
             }
 
+            $userHis = new UserApplicationHistory;
+            $userHis->user_id = $request->user()->id;
+            $userHis->app_id = $app->id;
+            $userHis->app_type = $getAppType;
+
+            if (!$userHis->save()) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Something went wrong! Your application is submitted but you cannot view it in your history records."
+                ], 500);
+            }
+
             Mail::to($getEmail)->send(new AppNotif($getEmail, $app_id));
 
             return response()->json([
@@ -280,6 +318,8 @@ class ApplicationController extends Controller
         $appFiles = ApplicationFiles::where("app_id", $id)->delete();
 
         $appTrackers = ApplicationTracker::where("app_id", $id)->delete();
+
+        $appHistory = UserApplicationHistory::where("app_id", $id)->delete();
 
         //find the application you wanted to delete
         $app = Application::find($id);
@@ -341,13 +381,20 @@ class ApplicationController extends Controller
         if ($status_count === 2) {
             $status = new ApplicationTracker;
             $status->app_id = $request->app_id;
-            $status->statusMsg = $request->statusMsg;
+            $status->statusMsg = $request->statusMsg . "\n - " . auth()->user()['name'];
             $status->status = $request->status;
 
             $app = Application::find($request->app_id);
             $app->status = $request->status;
 
+            $getEmail = json_decode($app->application_data, true)['email_address'];
+
             if ($status->save() && $app->save()) {
+
+                if (intval($request->status) === 3) {
+                    Mail::to($getEmail)->send(new AppApprove($getEmail, $app_id));
+                }
+
                 return response()->json([
                     "success" => true,
                     "message" => "Application status updated"
@@ -383,6 +430,19 @@ class ApplicationController extends Controller
             "success" => false,
             "message" => "Something went wrong."
         ], 500);
+    }
+
+    public function get_user_app_history() {
+        $user_history = DB::table('applications')
+                        ->leftjoin('user_application_histories', 'user_application_histories.app_id', '=', 'applications.id')
+                        ->where('user_application_histories.user_id', '=', auth()->user()->id)
+                        ->select('user_application_histories.id', 'applications.application_id', 'applications.created_at', 'applications.application_data')
+                        ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $user_history
+        ], 200);
     }
 
     public function test_post(Request $request) { 

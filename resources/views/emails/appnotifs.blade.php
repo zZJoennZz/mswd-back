@@ -3,7 +3,7 @@
 
 You can track your application by clicking the button below!
 
-@component('mail::button', ['url' => env('FRONTEND_URL', 'http://localhost:3000/')])
+@component('mail::button', ['url' => env('FRONTEND_URL', 'http://localhost:3000/') . 'track/' . $appId])
 Track
 @endcomponent
 
