@@ -31,6 +31,7 @@ use App\Http\Controllers\ClientController;
 
 // Route::post('validate', [AuthController::class, 'validateToken']);
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
+Route::post('register', [AuthController::class, 'register']);
 // Route::post('user/login', [ClientController::class, 'signin']);
 // Route::post('user/register', [ClientController::class, 'signup']);
 // Route::group(['prefix' => 'client', 'middleware' => ['auth:clientapi', 'scopes:client']], function () {

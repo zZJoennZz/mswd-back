@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use App\Mail\AppNotif;
 use App\Mail\AppApprove;
 use Illuminate\Http\Request;
@@ -436,7 +436,7 @@ class ApplicationController extends Controller
         $user_history = DB::table('applications')
                         ->leftjoin('user_application_histories', 'user_application_histories.app_id', '=', 'applications.id')
                         ->where('user_application_histories.user_id', '=', auth()->user()->id)
-                        ->select('user_application_histories.id', 'applications.application_id', 'applications.created_at', 'applications.application_data')
+                        ->select('user_application_histories.id', 'applications.application_id', 'applications.created_at', 'applications.application_data', 'applications.status')
                         ->get();
 
         return response()->json([

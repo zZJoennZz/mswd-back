@@ -9,6 +9,6 @@ class OrgPerson extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'first_name', 'middle_initial', 'last_name', 'suffix', 'gender', 'birthday'
+        'first_name', 'middle_initial', 'last_name', 'suffix', 'gender', 'birthday', 'img_path'
     ];
 }

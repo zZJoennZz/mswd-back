@@ -17,7 +17,7 @@ class OrgController extends Controller
             ->leftjoin('org_people', 'org_charts.person_id', '=', 'org_people.id')
             ->leftjoin('org_positions', 'org_charts.position_id', '=', 'org_positions.id')
             ->leftjoin('org_divisions', 'org_charts.division_id', '=', 'org_divisions.id')
-            ->select('org_charts.id', 'org_charts.under_of', 'org_divisions.id as division_id', 'org_people.first_name', 'org_people.middle_initial', 'org_people.last_name', 'org_people.suffix', 'org_positions.position_name', 'org_divisions.division_name', 'org_divisions.sub_division_of', 'org_divisions.order', 'org_charts.created_at', 'org_charts.updated_at')
+            ->select('org_charts.id', 'org_charts.under_of', 'org_divisions.id as division_id', 'org_people.first_name', 'org_people.middle_initial', 'org_people.last_name', 'org_people.suffix', 'org_positions.position_name', 'org_divisions.division_name', 'org_divisions.sub_division_of', 'org_divisions.order', 'org_charts.created_at', 'org_charts.updated_at', 'org_people.img_path')
             ->get();
         
         if (!$org) {
@@ -303,6 +303,51 @@ class OrgController extends Controller
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
+
+        if (!$request->hasFile('img_path')) {
+            return response()->json([
+                "success" => false,
+                "message" => "No file attached"
+            ], 400);
+        } 
+
+        //person image
+        $allowedFileExtension = ['png', 'jpg', 'jpeg', 'gif', 'PNG'];
+        $personImg = $request->file('img_path');
+        $extension = $personImg->getClientOriginalExtension();
+        $check = in_array($extension, $allowedFileExtension);
+        $res;
+
+        if ($check) {
+            //generate unique ID for saving and to avoid overwritting an image
+            $img_id =  uniqid("person", false) . date("mmddyyyHis");
+            //get the file original name
+            $name = $personImg->getClientOriginalName();
+            //save the file to ImgBB through their API
+            // $path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+            $contents = file_get_contents($request->file('img_path')->getRealPath());
+
+            $image_base64 = base64_encode($contents);
+            //dd($image_base64);
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            $imgToUpload = array('image' => $image_base64, 'name' => $name . $img_id);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $imgToUpload);
+
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                return response()->json([
+                    "success" => false,
+                    "message" => curl_error($ch)
+                ], 400);
+            }
+            curl_close($ch);
+            $res = json_decode($result);
+        }
+
         $person = $request->json()->all();
         $new_person = new OrgPerson;
         $new_person->first_name = $person['first_name'];
@@ -311,6 +356,7 @@ class OrgController extends Controller
         $new_person->suffix = $person['suffix'];
         $new_person->gender = $person['gender'];
         $new_person->birthday = $person['birthday'];
+        $new_person->image_path = $res->data->url;
 
         if ($new_person->save()) {
             return response()->json([

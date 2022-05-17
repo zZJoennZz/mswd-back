@@ -21,7 +21,7 @@ class CreateOrgPeopleTable extends Migration
             $table->text('suffix');
             $table->text('gender');
             $table->date('birthday');
-            $table->text('image');
+            $table->text('img_path');
             $table->timestamps();
         });
     }

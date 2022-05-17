@@ -41,6 +41,10 @@ class AuthController extends Controller
             $user->name = $request->name;
         }
 
+        if (!is_null($request->last_name)) {
+            $user->last_name = $request->last_name;
+        }
+
         if (!is_null($request->email)) {
             $user->email = $request->email;
         }
@@ -65,9 +69,12 @@ class AuthController extends Controller
     //update user 
     public function update_user(Request $request, $id) {
         $user = User::find($id);
-
         if (!is_null($request->name)) {
             $user->name = $request->name;
+        }
+
+        if (!is_null($request->last_name)) {
+            $user->last_name = $request->last_name;
         }
 
         if (!is_null($request->email)) {
@@ -91,11 +98,12 @@ class AuthController extends Controller
         }
     }
 
-    //register function
+    //add new user function
     public function signup(Request $request) {
         //test if the data is validated and correct
         $this->validate($request, [
             'name' => 'required|min:2',
+            'last_name' => 'required|min:2',
             'email' => 'required|email',
             'password' => 'required|min:4',
         ]);
@@ -103,9 +111,35 @@ class AuthController extends Controller
         //create new user login
         $user = User::create([
             'name' => $request->name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'is_admin' => 1
+        ]);
+
+        //generate token for the user
+        $token = $user->createToken(env("SEACREAT_KIEY"))->accessToken;
+        //send the response
+        return response()->json(['token' => $token], 200);
+    }
+
+    //register user function
+    public function register(Request $request) {
+        //test if the data is validated and correct
+        $this->validate($request, [
+            'name' => 'required|min:2',
+            'last_name' => 'required|min:2',
+            'email' => 'required|email',
+            'password' => 'required|min:4',
+        ]);
+
+        //create new user login
+        $user = User::create([
+            'name' => $request->name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'is_admin' => 0
         ]);
 
         //generate token for the user
@@ -176,6 +210,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Token have access',
                 'name' => auth()->user()['name'],
+                'last_name' => auth()->user()['last_name'],
                 'email' => auth()->user()['email']
             ], 200);
         }
@@ -189,12 +224,14 @@ class AuthController extends Controller
     public function getProfile(Request $request) {
         $userId = $request->user()->id;
         $userName = $request->user()->name;
+        $userLastName = $request->user()->last_name;
         $userEmail = $request->user()->email;
         return response()->json([
             'success' => true,
             'id' => $userId,
             'email' => $userEmail,
             'name' => $userName,
+            'last_name' => $userLastName,
         ], 200);
     }
 
