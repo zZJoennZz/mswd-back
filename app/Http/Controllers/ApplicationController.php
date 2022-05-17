@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
+//require_once(base_path('vendor') . '\pcloud\pcloud-php-sdk\lib\pCloud\autoload.php'); //for dev
 use App\Mail\AppNotif;
 use App\Mail\AppApprove;
 use Illuminate\Http\Request;
