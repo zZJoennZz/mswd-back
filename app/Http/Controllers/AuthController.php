@@ -189,6 +189,8 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Token have access',
                 'id' => $request->user()->id,
+                'name' => auth()->user()['name'],
+                'last_name' => auth()->user()['last_name']
             ], 200);
         } else {
             return response()->json([

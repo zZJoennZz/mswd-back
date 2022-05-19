@@ -121,7 +121,7 @@ class ClientMessageController extends Controller
             ], 404);
         }
 
-        $msg->notes = $msg_changes['notes'];
+        $msg->notes = $msg_changes['notes'] . ' - ' . auth()->user()['name'] . ' ' . auth()->user()['last_name'];
 
         if ($msg->save()) {
             return response()->json([
