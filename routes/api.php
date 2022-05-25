@@ -58,7 +58,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('org/person', [OrgController::class, 'get_person']);
     Route::post('org/person/post', [OrgController::class, 'post_person']);
-    Route::put('org/person/put/{id}', [OrgController::class, 'put_person']);
+    Route::post('org/person/put/{id}', [OrgController::class, 'put_person']);
     Route::delete('org/person/delete/{id}', [OrgController::class, 'delete_person']);
 
     Route::post('org/position/post', [OrgController::class, 'post_position']);

@@ -70,7 +70,9 @@ class OrgController extends Controller
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
+
         $data = $request->json()->all();
+
         $new_org = new OrgChart;
 
         $this->validate($request, [
@@ -348,20 +350,20 @@ class OrgController extends Controller
             $res = json_decode($result);
         }
 
-        $person = $request->json()->all();
+        //$person = $request->json()->all();
         $new_person = new OrgPerson;
-        $new_person->first_name = $person['first_name'];
-        $new_person->middle_initial = $person['middle_initial'];
-        $new_person->last_name = $person['last_name'];
-        $new_person->suffix = $person['suffix'];
-        $new_person->gender = $person['gender'];
-        $new_person->birthday = $person['birthday'];
-        $new_person->image_path = $res->data->url;
+        $new_person->first_name = $request->first_name;
+        $new_person->middle_initial = $request->middle_initial;
+        $new_person->last_name = $request->last_name;
+        $new_person->suffix = $request->suffix;
+        $new_person->gender = $request->gender;
+        $new_person->birthday = $request->birthday;
+        $new_person->img_path = $res->data->url;
 
         if ($new_person->save()) {
             return response()->json([
                 'success' => true,
-                'data' => $person
+                'message' => "Person record saved"
             ], 200);
         } else {
             return response()->json([
@@ -376,8 +378,9 @@ class OrgController extends Controller
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
-        $new_person = $request->json()->all();
+
         $person = OrgPerson::find($id);
+
 
         if (!$person) {
             return response()->json([
@@ -386,13 +389,53 @@ class OrgController extends Controller
             ], 404);
         }
 
+        if ($request->hasFile('img_path')) {
+            //person image
+            $allowedFileExtension = ['png', 'jpg', 'jpeg', 'gif', 'PNG'];
+            $personImg = $request->file('img_path');
+            $extension = $personImg->getClientOriginalExtension();
+            $check = in_array($extension, $allowedFileExtension);
+            $res;
+
+            if ($check) {
+                //generate unique ID for saving and to avoid overwritting an image
+                $img_id =  uniqid("person", false) . date("mmddyyyHis");
+                //get the file original name
+                $name = $personImg->getClientOriginalName();
+                //save the file to ImgBB through their API
+                // $path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
+                $contents = file_get_contents($request->file('img_path')->getRealPath());
+
+                $image_base64 = base64_encode($contents);
+                //dd($image_base64);
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                $imgToUpload = array('image' => $image_base64, 'name' => $name . $img_id);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $imgToUpload);
+
+                $result = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    return response()->json([
+                        "success" => false,
+                        "message" => curl_error($ch)
+                    ], 400);
+                }
+                curl_close($ch);
+                $res = json_decode($result);
+                $person->img_path = $res->data->url;
+            }
+        
+        }
         // $updated = $person->fill($new_person)->save();
-        if (!is_null($new_person['first_name'])) { $person->first_name = $new_person['first_name']; }
-        if (!is_null($new_person['middle_initial'])) { $person->middle_initial = $new_person['middle_initial']; }
-        if (!is_null($new_person['last_name'])) { $person->last_name = $new_person['last_name']; }
-        if (!is_null($new_person['suffix'])) { $person->suffix = $new_person['suffix']; }
-        if ($new_person['gender'] !== 3) { $person->gender = $new_person['gender']; }
-        if (!is_null($new_person['birthday'])) { $person->birthday = $new_person['birthday']; }
+        if (!is_null($request->first_name)) { $person->first_name = $request->first_name; }
+        if (!is_null($request->middle_initial)) { $person->middle_initial = $request->middle_initial; }
+        if (!is_null($request->last_name)) { $person->last_name = $request->last_name; }
+        if (!is_null($request->suffix)) { $person->suffix = $request->suffix; }
+        if ($request->gender !== 3 || $request->gender !== 0) { $person->gender = $request->gender; }
+        if (!is_null($request->birthday)) { $person->birthday = $request->birthday; }
 
         $updated = $person->save();
 
