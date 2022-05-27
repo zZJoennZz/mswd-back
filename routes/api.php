@@ -48,7 +48,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('updateprofile', [AuthController::class, 'update']);
     Route::get('getall', [AuthController::class, 'get_all']);
     Route::get('getsingle/{id}', [AuthController::class, 'get_single']);
-    Route::put('updatesingle/{id}', [AuthController::class, 'update_user']);
+    Route::post('updatesingle/{id}', [AuthController::class, 'update_user']);
 
     Route::post('application/post', [ApplicationController::class, 'post_application']);
 
