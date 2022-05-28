@@ -16,6 +16,7 @@ class CreateClientMessagesTable extends Migration
         Schema::create('client_messages', function (Blueprint $table) {
             $table->id();
             $table->text("email_address");
+            $table->text("contact_number");
             $table->text("full_name");
             $table->text("subject");
             $table->text("message");

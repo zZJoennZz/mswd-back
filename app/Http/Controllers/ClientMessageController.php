@@ -56,6 +56,7 @@ class ClientMessageController extends Controller
 
         $new_msg = new ClientMessage;
         $new_msg->email_address = $msg['email_address'];
+        $new_msg->contact_number = $msg['contact_number'];
         $new_msg->full_name = $msg['full_name'];
         $new_msg->subject = $msg['subject'];
         $new_msg->message = $msg['message'];

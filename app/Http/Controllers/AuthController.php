@@ -271,5 +271,33 @@ class AuthController extends Controller
             ], 401);
         }
     }
+
+    public function delete_user($id) {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
+
+        $user = User::find($id);
+
+        if ($user) {
+            if ($user->delete()) {
+                return response()->json([
+                    "success" => true,
+                    "message" => "Delete success"
+                ], 200);
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Something went wrong! User not deleted"
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "User cannot be found"
+            ], 404);
+        }
+    }
 }
  

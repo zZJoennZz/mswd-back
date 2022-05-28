@@ -49,6 +49,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('getall', [AuthController::class, 'get_all']);
     Route::get('getsingle/{id}', [AuthController::class, 'get_single']);
     Route::post('updatesingle/{id}', [AuthController::class, 'update_user']);
+    Route::delete('delete_user/{id}', [AuthController::class, 'delete_user']);
 
     Route::post('application/post', [ApplicationController::class, 'post_application']);
 
