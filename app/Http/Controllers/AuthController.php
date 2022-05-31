@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 
+use Illuminate\Support\Facades\DB;
+
 use Laravel\Passport\TokenRepository;
 use Laravel\Passport\RefreshTokenRepository;
 
@@ -240,8 +242,9 @@ class AuthController extends Controller
 
     //get all users
     public function get_all() {
-        $users = User::get();
+        // $users = User::get();
 
+        $users = DB::table('users')->where('is_admin', '1')->get();
         if ($users) {
             return response()->json([
                 "success" => true,
