@@ -114,6 +114,11 @@ class ApplicationController extends Controller
 
         $getEmail = json_decode($request->application_data, true)['email_address'];
         $getAppType = json_decode($request->application_data, true)['appliType'];
+        $isNew = json_decode($request->application_data, true)['appli_type'];
+        $getFirstName = json_decode($request->application_data, true)['first_name'];
+        $getMiddleName = json_decode($request->application_data, true)['middle_name'];
+        $getLastName = json_decode($request->application_data, true)['last_name'];
+        $getBirthday = json_decode($request->application_data, true)['dob'];
 
         $checkRecords = DB::table('user_application_histories')
                         ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
@@ -138,6 +143,45 @@ class ApplicationController extends Controller
             }
         }
 
+        if ($getAppType === 1 || $getAppType === 2) {
+            $filter = [['applications.status', '=', 3], ['user_application_histories.user_id', '=', auth()->user()['id']], ['user_application_histories.app_type', '=', $getAppType]];
+
+            $checkRecordsForOldApp = DB::table('user_application_histories')
+                                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+                                        // ->where('applications.status', '=', 3)
+                                        // ->where('user_application_histories.user_id', '=', auth()->user()['id'])
+                                        // ->where('user_application_histories.app_type', '=', $getAppType)
+                                        ->where($filter)
+                                        ->select('applications.id', 'applications.application_data')
+                                        ->get();
+
+            if ($isNew === "new" && count($checkRecordsForOldApp) >= 1) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "You are already approved to this ID",
+                   
+                ], 400);
+            } 
+
+            $filter = [['applications.status', '=', 3], ['user_application_histories.app_type', '=', $getAppType]];
+            $checkRecordsForOldAppAgain = DB::table('user_application_histories')
+                                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+                                        ->where($filter)
+                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.first_name'))"), "=", $getFirstName)
+                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.middle_name'))"), "=", $getMiddleName)
+                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.last_name'))"), "=", $getLastName)
+                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.dob'))"), "=", $getBirthday)
+                                        ->select('applications.id', 'applications.application_data')
+                                        ->get();
+            
+            if ($isNew === "new" && count($checkRecordsForOldAppAgain) >= 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "You already applied for this ID"
+                ], 400);
+            }
+        }
+
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
         $folder_id = 12362338034;
@@ -149,9 +193,11 @@ class ApplicationController extends Controller
         $pcloudFolder = new pCloud\Folder($pCloudApp);
         $pcloudFile = new pCloud\File($pCloudApp);
 
-        //create ID to prevent overwritting
+        //create ID to prevent overwriting
         $rand = substr(md5(microtime()),rand(0,26),3);
-        $app_id =  "SR" . $rand . date("mdyyHis");
+        $app_id_prefix = ($getAppType === 1 ? "SP" : ($getAppType === 2 ? "PWD" : "SC"));
+
+        $app_id =  $app_id_prefix . $rand . date("mdyyHis");
 
         //check if the application submitted files then send response
         if (!$request->hasFile('application_pic') || !$request->hasFile('application_sig') || !$request->hasFile('docs')) {
