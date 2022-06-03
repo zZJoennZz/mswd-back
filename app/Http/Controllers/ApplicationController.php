@@ -63,23 +63,39 @@ class ApplicationController extends Controller
         
         $method = "getfilepublink";
         
+        
         $appFiles = [];
         foreach($app_files as $files) {
             $fileId = json_decode($files->file)->metadata->fileid;
             $fileName = json_decode($files->file)->metadata->name;
+            $fileType = json_decode($files->file)->metadata->contenttype;
             $params = array(
-                'fileid' => $fileId
+                'fileid' => $fileId,
             );
             $req = new pCloud\Request($pCloudApp);
             $res = $req->get($method, $params);
             
-            
+            $thumbnailLink = "n/a";
 
+            if(substr($fileType,0,5) === "image") {
+                $method1 = "getpubthumblink";
+                $params1 = array(
+                    'fileid' => $fileId,
+                    'code' => $res->code,
+                    'size' => "100x100"
+                );
+
+                $req1 = new pCloud\Request($pCloudApp);
+                $res1 = $req1->get($method1, $params1);
+
+                $thumbnailLink = $res1->hosts[0] . stripslashes($res1->path);
+            }
             array_push($appFiles, array(
                 'id' => $files->id, 
                 'app_id' => $files->app_id,
                 'file_name' => $files->file_name . " - " . $fileName,
-                'file_url' => $res->link
+                'file_url' => $res->link,
+                'image_url' => $thumbnailLink
             ));
         }
 
