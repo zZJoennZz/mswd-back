@@ -47,6 +47,8 @@ class ApplicationController extends Controller
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
+        $rand = substr(md5(microtime()), rand(0, 26), 3);
+        $app_id =  $rand . date("mdyyHis");
         //put credentials for the cloud server
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
@@ -88,9 +90,36 @@ class ApplicationController extends Controller
 
                 $req1 = new pCloud\Request($pCloudApp);
                 $res1 = $req1->get($method1, $params1);
+                $toUpload = $res1->hosts[0] . stripslashes($res1->path);
 
-                $thumbnailLink = $res1->hosts[0] . stripslashes($res1->path);
+                // upload to different imghost
+                //$contents = file_get_contents($toUpload);
+                $image_base64 = base64_encode(file_get_contents("https://" . $toUpload));
+
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                $imgToUpload = array('image' => $image_base64, 'name' => $app_id);
+
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $imgToUpload);
+
+                $result = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    return response()->json([
+                        "success" => false,
+                        "message" => curl_error($ch)
+                    ], 400);
+                }
+                curl_close($ch);
+                $res2 = json_decode($result);
+
+                //end upload to different imghost
+
+                $thumbnailLink = $res2->data->url;
             }
+
             array_push($appFiles, array(
                 'id' => $files->id,
                 'app_id' => $files->app_id,

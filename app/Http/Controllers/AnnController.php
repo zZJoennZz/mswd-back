@@ -9,11 +9,12 @@ use App\Models\Announcement;
 class AnnController extends Controller
 {
     //function to get all announcements from the database and sends out as json object to the frontend website
-    public function get_all() {
+    public function get_all()
+    {
 
         //get all the announcements from the database  and store $ann
         $ann = Announcement::all();
-        
+
         //sending out the announcements as json object to the frontend website
         if ($ann) {
             return response()->json([
@@ -30,7 +31,8 @@ class AnnController extends Controller
     }
 
     //function to get a single announcement by using the ID
-    public function get_single($id) {
+    public function get_single($id)
+    {
         //gets the ID from the route path then store the single announcement record to $ann
         $ann = Announcement::find($id);
 
@@ -49,7 +51,8 @@ class AnnController extends Controller
     }
 
     //for application form to be posted
-    public function post_ann(Request $request) {
+    public function post_ann(Request $request)
+    {
         if (auth()->user()['is_admin'] !== 1) return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -61,7 +64,7 @@ class AnnController extends Controller
                 "success" => false,
                 "message" => "No file attached"
             ], 400);
-        } 
+        }
 
         //create new record through the Announcement model
         $ann = new Announcement;
@@ -79,7 +82,7 @@ class AnnController extends Controller
         //check if the file's extension is in the array of allowed extension
         $check = in_array($extension, $allowedFileExtension);
         //initiate the path variable
-        $path;
+        $path = "";
 
         //check if the check variable is true or false about the file's extension
         if ($check) {
@@ -92,7 +95,7 @@ class AnnController extends Controller
             $contents = file_get_contents($request->file('announcement_img')->getRealPath());
 
             $image_base64 = base64_encode($contents);
-            //dd($image_base64);
+
             $ch = curl_init();
 
             curl_setopt($ch, CURLOPT_URL, 'https://api.imgbb.com/1/upload?key=d1f0d556dc4121b9db63e20830ba67f7');
@@ -119,7 +122,7 @@ class AnnController extends Controller
         }
 
         //add the image file name to table field
-        
+
         $ann->image_path = $res->data->url;
 
         //save the record to the database and send a success or fail message as response to frontend website
@@ -137,7 +140,8 @@ class AnnController extends Controller
     }
 
     //updating a announcement post
-    public function put_ann(Request $request, $id) {
+    public function put_ann(Request $request, $id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -161,7 +165,7 @@ class AnnController extends Controller
             //check if true or felse if extension is in the allowed file extension
             $check = in_array($extension, $allowedFileExtension);
             //check if the check variable is true or false then send the appropriate response
-            if ($check) { 
+            if ($check) {
                 $name = $featuredImg->getClientOriginalName();
                 //$path = $featuredImg->storeAs('public/ann-img', $img_id . $name);
                 $contents = file_get_contents($request->file('announcement_img')->getRealPath());
@@ -201,7 +205,7 @@ class AnnController extends Controller
         if (!is_null($request->announcement_title)) {
             $ann->announcement_title = $request->announcement_title;
         }
-        
+
         if (!is_null($request->announcement_body)) {
             $ann->announcement_body = $request->announcement_body;
         }
@@ -221,7 +225,8 @@ class AnnController extends Controller
     }
 
     //delete function for announcements
-    public function delete_ann($id) {
+    public function delete_ann($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -242,7 +247,7 @@ class AnnController extends Controller
             //deletes the announcement
             if ($ann->delete()) {
                 return response()->json([
-                    "success" => true, 
+                    "success" => true,
                     "message" => "Announcement successfully deleted"
                 ], 200);
             } else {
