@@ -17,7 +17,8 @@ use pCloud;
 class ApplicationController extends Controller
 {
     //get all application records
-    public function get_all() {
+    public function get_all()
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -31,7 +32,6 @@ class ApplicationController extends Controller
                 "success" => true,
                 "data" => $apps
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 "success" => false,
@@ -41,7 +41,8 @@ class ApplicationController extends Controller
     }
 
     //get single record of application
-    public function get_single($id) {
+    public function get_single($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -50,7 +51,7 @@ class ApplicationController extends Controller
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
         $folder_id = 12362338034;
-        
+
         //get a single application record using ID and store to $app variable
         $app = Application::find($id);
         $app_files = ApplicationFiles::where('app_id', $id)->get();
@@ -60,12 +61,12 @@ class ApplicationController extends Controller
 
         //$pcloudFolder = new pCloud\Folder($pCloudApp);
         $pcloudFile = new pCloud\File($pCloudApp);
-        
+
         $method = "getfilepublink";
-        
-        
+
+
         $appFiles = [];
-        foreach($app_files as $files) {
+        foreach ($app_files as $files) {
             $fileId = json_decode($files->file)->metadata->fileid;
             $fileName = json_decode($files->file)->metadata->name;
             $fileType = json_decode($files->file)->metadata->contenttype;
@@ -74,10 +75,10 @@ class ApplicationController extends Controller
             );
             $req = new pCloud\Request($pCloudApp);
             $res = $req->get($method, $params);
-            
+
             $thumbnailLink = "n/a";
 
-            if(substr($fileType,0,5) === "image") {
+            if (substr($fileType, 0, 5) === "image") {
                 $method1 = "getpubthumblink";
                 $params1 = array(
                     'fileid' => $fileId,
@@ -91,7 +92,7 @@ class ApplicationController extends Controller
                 $thumbnailLink = $res1->hosts[0] . stripslashes($res1->path);
             }
             array_push($appFiles, array(
-                'id' => $files->id, 
+                'id' => $files->id,
                 'app_id' => $files->app_id,
                 'file_name' => $files->file_name . " - " . $fileName,
                 'file_url' => $res->link,
@@ -122,7 +123,8 @@ class ApplicationController extends Controller
     }
 
     //post application
-    public function post_application(Request $request) {
+    public function post_application(Request $request)
+    {
         if (auth()->user()['is_admin'] === "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -130,17 +132,20 @@ class ApplicationController extends Controller
 
         $getEmail = json_decode($request->application_data, true)['email_address'];
         $getAppType = json_decode($request->application_data, true)['appliType'];
-        $isNew = json_decode($request->application_data, true)['appli_type'];
+        $isNew = 0;
+        if ($getAppType !== 3) {
+            $isNew = json_decode($request->application_data, true)['appli_type'];
+        }
         $getFirstName = json_decode($request->application_data, true)['first_name'];
         $getMiddleName = json_decode($request->application_data, true)['middle_name'];
         $getLastName = json_decode($request->application_data, true)['last_name'];
         $getBirthday = json_decode($request->application_data, true)['dob'];
 
         $checkRecords = DB::table('user_application_histories')
-                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
-                        ->where('applications.status', '=', 0)
-                        ->select('applications.id', 'applications.application_data')
-                        ->get();
+            ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+            ->where('applications.status', '=', 0)
+            ->select('applications.id', 'applications.application_data')
+            ->get();
 
         if (count($checkRecords) >= 1) {
             $getAppIds = array();
@@ -163,33 +168,33 @@ class ApplicationController extends Controller
             $filter = [['applications.status', '=', 3], ['user_application_histories.user_id', '=', auth()->user()['id']], ['user_application_histories.app_type', '=', $getAppType]];
 
             $checkRecordsForOldApp = DB::table('user_application_histories')
-                                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
-                                        // ->where('applications.status', '=', 3)
-                                        // ->where('user_application_histories.user_id', '=', auth()->user()['id'])
-                                        // ->where('user_application_histories.app_type', '=', $getAppType)
-                                        ->where($filter)
-                                        ->select('applications.id', 'applications.application_data')
-                                        ->get();
+                ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+                // ->where('applications.status', '=', 3)
+                // ->where('user_application_histories.user_id', '=', auth()->user()['id'])
+                // ->where('user_application_histories.app_type', '=', $getAppType)
+                ->where($filter)
+                ->select('applications.id', 'applications.application_data')
+                ->get();
 
             if ($isNew === "new" && count($checkRecordsForOldApp) >= 1) {
                 return response()->json([
                     "success" => false,
                     "message" => "You are already approved to this ID",
-                   
+
                 ], 400);
-            } 
+            }
 
             $filter = [['applications.status', '=', 3], ['user_application_histories.app_type', '=', $getAppType]];
             $checkRecordsForOldAppAgain = DB::table('user_application_histories')
-                                        ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
-                                        ->where($filter)
-                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.first_name'))"), "=", $getFirstName)
-                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.middle_name'))"), "=", $getMiddleName)
-                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.last_name'))"), "=", $getLastName)
-                                        ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.dob'))"), "=", $getBirthday)
-                                        ->select('applications.id', 'applications.application_data')
-                                        ->get();
-            
+                ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
+                ->where($filter)
+                ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.first_name'))"), "=", $getFirstName)
+                ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.middle_name'))"), "=", $getMiddleName)
+                ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.last_name'))"), "=", $getLastName)
+                ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(`applications`.`application_data`, '$.dob'))"), "=", $getBirthday)
+                ->select('applications.id', 'applications.application_data')
+                ->get();
+
             if ($isNew === "new" && count($checkRecordsForOldAppAgain) >= 1) {
                 return response()->json([
                     'success' => false,
@@ -210,7 +215,7 @@ class ApplicationController extends Controller
         $pcloudFile = new pCloud\File($pCloudApp);
 
         //create ID to prevent overwriting
-        $rand = substr(md5(microtime()),rand(0,26),3);
+        $rand = substr(md5(microtime()), rand(0, 26), 3);
         $app_id_prefix = ($getAppType === 1 ? "SP" : ($getAppType === 2 ? "PWD" : "SC"));
 
         $app_id =  $app_id_prefix . $rand . date("mdyyHis");
@@ -250,7 +255,7 @@ class ApplicationController extends Controller
         $allowedFileExtension = ['pdf', 'PDF'];
 
         $docs = $request->file('docs');
-        
+
         foreach ($docs as $doc) {
             $check_doc = in_array($doc->getClientOriginalExtension(), $allowedFileExtension);
             if (!$check_doc) {
@@ -264,7 +269,7 @@ class ApplicationController extends Controller
         //save the records then send response and application ID for tracking
         if ($app->save()) {
             //upload 1x1 pic
-            $fileMetaData = $pcloudFile->upload($application_pic->getRealPath(), $folder_id, $app_id . rand(1,1000) .$application_pic->getClientOriginalName());
+            $fileMetaData = $pcloudFile->upload($application_pic->getRealPath(), $folder_id, $app_id . rand(1, 1000) . $application_pic->getClientOriginalName());
 
             $app_pic = new ApplicationFiles;
             $app_pic->app_id = $app->id;
@@ -311,9 +316,8 @@ class ApplicationController extends Controller
                         "message" => "Application file FAILED to upload."
                     ], 500);
                 }
-
             }
-            
+
             $app_status = new ApplicationTracker;
             $app_status->app_id = $app->id;
             $app_status->statusMsg = "Application submitted on " . $app->created_at;
@@ -343,7 +347,7 @@ class ApplicationController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "Application success",
-                "application_id" => $app_id 
+                "application_id" => $app_id
             ], 200);
         } else {
             return response()->json([
@@ -354,7 +358,8 @@ class ApplicationController extends Controller
     }
 
     //delete an application
-    public function delete_application($id) {
+    public function delete_application($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -365,18 +370,18 @@ class ApplicationController extends Controller
         $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
         $locationid = 1;
         $folder_id = 12362338034;
-        
+
         $pCloudApp = new pCloud\App();
         $pCloudApp->setAccessToken($access_token);
         $pCloudApp->setLocationId($locationid);
-        
-        foreach($appFileMeta as $file) {
+
+        foreach ($appFileMeta as $file) {
             $pcloudFile = new pCloud\File($pCloudApp);
 
             $fileId = json_decode($file->file)->metadata->fileid;
             $pcloudFile->delete($fileId);
         }
-        
+
         $appFiles = ApplicationFiles::where("app_id", $id)->delete();
 
         $appTrackers = ApplicationTracker::where("app_id", $id)->delete();
@@ -408,7 +413,8 @@ class ApplicationController extends Controller
         }
     }
 
-    public function get_app_status($app_id) {
+    public function get_app_status($app_id)
+    {
         $app_status = DB::table('application_trackers')
             ->leftjoin('applications', 'applications.id', '=', 'application_trackers.app_id')
             ->select('application_trackers.*', 'applications.application_id')
@@ -420,7 +426,7 @@ class ApplicationController extends Controller
                 "success" => false,
                 "message" => "Application status could NOT be fetched"
             ], 500);
-        } 
+        }
 
         return response()->json([
             "success" => true,
@@ -428,7 +434,8 @@ class ApplicationController extends Controller
         ], 200);
     }
 
-    public function post_app_status(Request $request) {
+    public function post_app_status(Request $request)
+    {
         $status_count = DB::table('application_trackers')
             ->where('app_id', $request->app_id)
             ->count();
@@ -454,7 +461,7 @@ class ApplicationController extends Controller
             if ($status->save() && $app->save()) {
 
                 if (intval($request->status) === 3) {
-                    Mail::to($getEmail)->send(new AppApprove($getEmail, $app_id));
+                    Mail::to($getEmail)->send(new AppApprove($getEmail, $request->app_id));
                 }
 
                 return response()->json([
@@ -494,12 +501,13 @@ class ApplicationController extends Controller
         ], 500);
     }
 
-    public function get_user_app_history() {
+    public function get_user_app_history()
+    {
         $user_history = DB::table('applications')
-                        ->leftjoin('user_application_histories', 'user_application_histories.app_id', '=', 'applications.id')
-                        ->where('user_application_histories.user_id', '=', auth()->user()->id)
-                        ->select('user_application_histories.id', 'applications.application_id', 'applications.created_at', 'applications.application_data', 'applications.status')
-                        ->get();
+            ->leftjoin('user_application_histories', 'user_application_histories.app_id', '=', 'applications.id')
+            ->where('user_application_histories.user_id', '=', auth()->user()->id)
+            ->select('user_application_histories.id', 'applications.application_id', 'applications.created_at', 'applications.application_data', 'applications.status')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -507,7 +515,8 @@ class ApplicationController extends Controller
         ], 200);
     }
 
-    public function test_post(Request $request) { 
+    public function test_post(Request $request)
+    {
         // {
         //     "result": 0,
         //     "userid": 17978566,
@@ -526,7 +535,7 @@ class ApplicationController extends Controller
 
         // $pcloudFolder = new pCloud\Folder($pCloudApp);
         // $pcloudFile = new pCloud\File($pCloudApp);
-        
+
         // $files = $request->file('docs');
         // $errctr = 0;
         // if ($request->hasFile('docs')) {
