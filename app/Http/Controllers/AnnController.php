@@ -53,7 +53,7 @@ class AnnController extends Controller
     //for application form to be posted
     public function post_ann(Request $request)
     {
-        if (auth()->user()['is_admin'] !== 1) return response()->json([
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
