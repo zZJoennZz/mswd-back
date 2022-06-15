@@ -162,9 +162,7 @@ class ApplicationController extends Controller
         $getEmail = json_decode($request->application_data, true)['email_address'];
         $getAppType = json_decode($request->application_data, true)['appliType'];
         $isNew = 0;
-        if ($getAppType !== 3) {
-            $isNew = json_decode($request->application_data, true)['appli_type'];
-        }
+        $isNew = json_decode($request->application_data, true)['appli_type'];
         $getFirstName = json_decode($request->application_data, true)['first_name'];
         $getMiddleName = json_decode($request->application_data, true)['middle_name'];
         $getLastName = json_decode($request->application_data, true)['last_name'];
@@ -193,7 +191,7 @@ class ApplicationController extends Controller
             }
         }
 
-        if ($getAppType === 1 || $getAppType === 2) {
+        if ($getAppType === 1 || $getAppType === 2 || $getAppType === 3) {
             $filter = [['applications.status', '=', 3], ['user_application_histories.user_id', '=', auth()->user()['id']], ['user_application_histories.app_type', '=', $getAppType]];
 
             $checkRecordsForOldApp = DB::table('user_application_histories')
@@ -544,54 +542,38 @@ class ApplicationController extends Controller
         ], 200);
     }
 
-    public function test_post(Request $request)
+    public function submit_additional(Request $request)
     {
-        // {
-        //     "result": 0,
-        //     "userid": 17978566,
-        //     "locationid": 1,
-        //     "token_type": "bearer",
-        //     "access_token": "gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy"
-        // }
+        $app = Application::find($request->id);
 
-        // $access_token = 'gxRm7Z2sQ7W52IlDfZzhSai7ZodY01KQSM8XsQraR76f8109rKDiy';
-        // $locationid = 1;
-        // $folder_id = 12362338034;
+        $decoded_json = json_decode($app->application_data);
 
-        // $pCloudApp = new pCloud\App();
-        // $pCloudApp->setAccessToken($access_token);
-        // $pCloudApp->setLocationId($locationid);
+        if ($decoded_json->appliType === 3) {
+            $decoded_json->oscaId = $request->oscaId;
+        } else if ($decoded_json->appliType === 2) {
+            $decoded_json->pdnum = $request->pdnum;
+            $decoded_json->proc_off_last_name = $request->proc_off_last_name;
+            $decoded_json->proc_off_first_name = $request->proc_off_first_name;
+            $decoded_json->proc_off_middle_name = $request->proc_off_middle_name;
+            $decoded_json->appr_off_last_name = $request->appr_off_last_name;
+            $decoded_json->appr_off_first_name = $request->appr_off_first_name;
+            $decoded_json->appr_off_middle_name = $request->appr_off_middle_name;
+            $decoded_json->encoder_last_name = $request->encoder_last_name;
+            $decoded_json->encoder_first_name = $request->encoder_first_name;
+            $decoded_json->encoder_middle_name = $request->encoder_middle_name;
+            $decoded_json->reporting_unit = $request->reporting_unit;
+            $decoded_json->control_no = $request->control_no;
+        }
 
-        // $pcloudFolder = new pCloud\Folder($pCloudApp);
-        // $pcloudFile = new pCloud\File($pCloudApp);
+        $app->application_data = json_encode($decoded_json);
 
-        // $files = $request->file('docs');
-        // $errctr = 0;
-        // if ($request->hasFile('docs')) {
-        //     foreach ($files as $file) {
-        //         $fileMetadata = $pcloudFile->upload($file, $folder_id, "test" . $file->getClientOriginalName());
-        //         $app_pic = new ApplicationFiles;
-        //         $app_pic->app_id = 24;
-        //         $app_pic->file = json_encode($fileMetadata);
-        //         $app_pic->file_name = "Document";
-        //         $app_pic_save = $app_pic->save();
+        if ($app->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Changes saved"
+            ], 200);
+        }
 
-        //         if (!$app_pic_save) {
-        //             $errctr += 1;
-        //         }
-        //     }
-        // }
-
-        // if ($errctr >= 1) {
-        //     return response()->json([
-        //         "success" => false,
-        //         "message" => "Cannot be saved."
-        //     ], 401);
-        // } else {
-        //     return response()->json([
-        //         "success" => true,
-        //         "message" => "Success"
-        //     ], 200);
-        // }
+        return $decoded_json->oscaId;
     }
 }

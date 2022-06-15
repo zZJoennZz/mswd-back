@@ -52,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('delete_user/{id}', [AuthController::class, 'delete_user']);
 
     Route::post('application/post', [ApplicationController::class, 'post_application']);
+    Route::post('application/additional', [ApplicationController::class, 'submit_additional']);
 
     Route::post('org/division/post', [OrgController::class, 'post_division']);
     Route::put('org/division/put/{id}', [OrgController::class, 'put_division']);
@@ -94,7 +95,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('application', [ApplicationController::class, 'get_all']);
     Route::get('application/{id}', [ApplicationController::class, 'get_single']);
     Route::delete('application/delete/{id}', [ApplicationController::class, 'delete_application']);
-    Route::post('application/status/post', [ApplicationController::class,'post_app_status']);
+    Route::post('application/status/post', [ApplicationController::class, 'post_app_status']);
 
     Route::get('dashboard/count', [OtherController::class, 'count_dashboard']);
 });
@@ -121,7 +122,7 @@ Route::post('test', [ApplicationController::class, 'test_post']);
 Route::get('track/{app_id}', [ApplicationController::class, 'get_app_status']);
 
 //invalid access
-Route::get('invalid', function() {
+Route::get('invalid', function () {
     return response()->json([
         'success' => false,
         'message' => "Invalid access"
