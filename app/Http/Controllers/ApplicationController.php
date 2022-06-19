@@ -171,6 +171,7 @@ class ApplicationController extends Controller
         $checkRecords = DB::table('user_application_histories')
             ->leftjoin('applications', 'user_application_histories.app_id', '=', 'applications.id')
             ->where('applications.status', '=', 0)
+            ->where('user_application_histories.user_id', '=', $request->user()->id)
             ->select('applications.id', 'applications.application_data')
             ->get();
 
