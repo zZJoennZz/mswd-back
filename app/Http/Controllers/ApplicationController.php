@@ -40,6 +40,30 @@ class ApplicationController extends Controller
         }
     }
 
+    public function get_all_for_report($start_date, $end_date)
+    {
+        if (auth()->user()['is_admin'] !== "1") return response()->json([
+            "success" => false,
+            "message" => "You have NO authorization here"
+        ], 401);
+
+        //store all application records to $app variable
+        $apps = DB::table('applications')->whereDate('created_at', ">=", $start_date)->whereDate('created_at', "<=", $end_date)->get();
+
+        //send response to frontend
+        try {
+            return response()->json([
+                "success" => true,
+                "data" => $apps
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                "success" => false,
+                "message" => $th
+            ], 500);
+        }
+    }
+
     //get single record of application
     public function get_single($id)
     {

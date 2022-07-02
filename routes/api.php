@@ -53,6 +53,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('application/post', [ApplicationController::class, 'post_application']);
     Route::post('application/additional', [ApplicationController::class, 'submit_additional']);
+    route::get('application/get_all_report/{start_date}/{end_date}', [ApplicationController::class, 'get_all_for_report']);
 
     Route::post('org/division/post', [OrgController::class, 'post_division']);
     Route::put('org/division/put/{id}', [OrgController::class, 'put_division']);
