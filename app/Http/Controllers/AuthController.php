@@ -13,7 +13,8 @@ use Laravel\Passport\RefreshTokenRepository;
 class AuthController extends Controller
 {
     //admin signin function
-    public function signin(Request $request) {
+    public function signin(Request $request)
+    {
 
         //store the request payload to data array
         $data = [
@@ -33,9 +34,10 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
     }
-    
+
     //update user 
-    public function update(Request $request) {
+    public function update(Request $request)
+    {
         $userId = $request->user()->id;
         $user = User::find($userId);
 
@@ -49,6 +51,14 @@ class AuthController extends Controller
 
         if (!is_null($request->email)) {
             $user->email = $request->email;
+        }
+
+        if (!is_null($request->address)) {
+            $user->address = $request->address;
+        }
+
+        if (!is_null($request->barangay)) {
+            $user->barangay = $request->barangay;
         }
 
         if (!is_null($request->password)) {
@@ -69,7 +79,8 @@ class AuthController extends Controller
     }
 
     //update user 
-    public function update_user(Request $request, $id) {
+    public function update_user(Request $request, $id)
+    {
         $user = User::find($id);
 
         if (!is_null($request->name)) {
@@ -82,6 +93,14 @@ class AuthController extends Controller
 
         if (!is_null($request->email)) {
             $user->email = $request->email;
+        }
+
+        if (!is_null($request->address)) {
+            $user->address = $request->address;
+        }
+
+        if (!is_null($request->barangay)) {
+            $user->barangay = $request->barangay;
         }
 
         if (!is_null($request->password)) {
@@ -102,13 +121,16 @@ class AuthController extends Controller
     }
 
     //add new user function
-    public function signup(Request $request) {
+    public function signup(Request $request)
+    {
         //test if the data is validated and correct
         $this->validate($request, [
             'name' => 'required|min:2',
             'last_name' => 'required|min:2',
             'email' => 'required|email',
             'password' => 'required|min:4',
+            'address' => 'required|min:3',
+            'barangay' => 'required',
         ]);
 
         //create new user login
@@ -117,7 +139,9 @@ class AuthController extends Controller
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'is_admin' => 1
+            'is_admin' => 1,
+            'address' => $request->address,
+            'barangay' => $request->barangay,
         ]);
 
         //generate token for the user
@@ -127,13 +151,16 @@ class AuthController extends Controller
     }
 
     //register user function
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         //test if the data is validated and correct
         $this->validate($request, [
             'name' => 'required|min:2',
             'last_name' => 'required|min:2',
             'email' => 'required|email',
             'password' => 'required|min:4',
+            'address' => 'required|min:3',
+            'barangay' => 'required'
         ]);
 
         //create new user login
@@ -142,7 +169,9 @@ class AuthController extends Controller
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'is_admin' => 0
+            'is_admin' => 0,
+            'address' => $request->address,
+            'barangay' => $request->barangay
         ]);
 
         //generate token for the user
@@ -152,14 +181,15 @@ class AuthController extends Controller
     }
 
     //signout the user
-    public function signout(Request $request) {
+    public function signout(Request $request)
+    {
         //get the tokens
         $tokenRepository = app(TokenRepository::class);
         //check the status of the user if logged in or not
         $is_logged_in = auth()->guard('api')->check();
         //get token of the user
-        $token = auth()->user()->token();    
-        
+        $token = auth()->user()->token();
+
         //check if the user is logged in and revoke the token login access
         if ($is_logged_in) {
             $request->user()->token()->revoke();
@@ -177,7 +207,8 @@ class AuthController extends Controller
 
     //checking if the token have access to api
     //this is used everytime we load an admin page
-    public function validateToken(Request $request) {
+    public function validateToken(Request $request)
+    {
         //check the token
         $is_logged_in = auth()->guard('api')->check();
         //dd($request->header());
@@ -193,7 +224,9 @@ class AuthController extends Controller
                 'message' => 'Token have access',
                 'id' => $request->user()->id,
                 'name' => auth()->user()['name'],
-                'last_name' => auth()->user()['last_name']
+                'last_name' => auth()->user()['last_name'],
+                'address' => auth()->user()['address'],
+                'barangay' => auth()->user()['barangay'],
             ], 200);
         } else {
             return response()->json([
@@ -203,20 +236,23 @@ class AuthController extends Controller
         }
     }
 
-    public function validateUserToken(Request $request) {
+    public function validateUserToken(Request $request)
+    {
         $is_logged_in = auth()->guard('api')->check();
         if ($is_logged_in) {
             if (auth()->user()['is_admin'] !== "0") return response()->json([
                 "success" => false,
                 "message" => "You are NOT allowed here"
             ], 401);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Token have access',
                 'name' => auth()->user()['name'],
                 'last_name' => auth()->user()['last_name'],
-                'email' => auth()->user()['email']
+                'email' => auth()->user()['email'],
+                'address' => auth()->user()['address'],
+                'barangay' => auth()->user()['barangay'],
             ], 200);
         }
         return response()->json([
@@ -226,22 +262,28 @@ class AuthController extends Controller
     }
 
     //get user profile
-    public function getProfile(Request $request) {
+    public function getProfile(Request $request)
+    {
         $userId = $request->user()->id;
         $userName = $request->user()->name;
         $userLastName = $request->user()->last_name;
         $userEmail = $request->user()->email;
+        $userAddress = $request->user()->address;
+        $userBrgy = $request->user()->barangay;
         return response()->json([
             'success' => true,
             'id' => $userId,
             'email' => $userEmail,
             'name' => $userName,
             'last_name' => $userLastName,
+            'address' => $userAddress,
+            'barangay' => $userBrgy
         ], 200);
     }
 
     //get all users
-    public function get_all() {
+    public function get_all()
+    {
         // $users = User::get();
 
         $users = DB::table('users')->where('is_admin', '1')->get();
@@ -259,7 +301,8 @@ class AuthController extends Controller
     }
 
     //get single user
-    public function get_single($id) {
+    public function get_single($id)
+    {
         $user = User::find($id);
 
         if ($user) {
@@ -275,7 +318,8 @@ class AuthController extends Controller
         }
     }
 
-    public function delete_user($id) {
+    public function delete_user($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -303,4 +347,3 @@ class AuthController extends Controller
         }
     }
 }
- 

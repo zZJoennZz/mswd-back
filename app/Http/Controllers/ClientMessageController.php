@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Mail;
 class ClientMessageController extends Controller
 {
     //
-    public function get_all() {
+    public function get_all()
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
         ], 401);
         $msgs = ClientMessage::all();
-        
+
         if (!$msgs) {
             return response()->json([
                 'success' => false,
@@ -31,7 +32,8 @@ class ClientMessageController extends Controller
         }
     }
 
-    public function get_msg($id) {
+    public function get_msg($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -51,7 +53,8 @@ class ClientMessageController extends Controller
         }
     }
 
-    public function post_msg(Request $request) {
+    public function post_msg(Request $request)
+    {
         $msg = $request->json()->all();
 
         $new_msg = new ClientMessage;
@@ -64,7 +67,7 @@ class ClientMessageController extends Controller
         $new_msg->status = 0;
 
         if ($new_msg->save()) {
-            Mail::to($msg['email_address'])->send(new Notification($msg['email_address']));
+            // Mail::to($msg['email_address'])->send(new Notification($msg['email_address']));
             return response()->json([
                 'success' => true,
                 'message' => 'Message is submitted'
@@ -77,7 +80,8 @@ class ClientMessageController extends Controller
         }
     }
 
-    public function change_status(Request $request, $id) {
+    public function change_status(Request $request, $id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -107,7 +111,8 @@ class ClientMessageController extends Controller
         }
     }
 
-    public function update_note(Request $request, $id) {
+    public function update_note(Request $request, $id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -137,7 +142,8 @@ class ClientMessageController extends Controller
         }
     }
 
-    public function delete_msg($id) {
+    public function delete_msg($id)
+    {
         if (auth()->user()['is_admin'] !== "1") return response()->json([
             "success" => false,
             "message" => "You have NO authorization here"
@@ -163,5 +169,4 @@ class ClientMessageController extends Controller
             }
         }
     }
-
 }

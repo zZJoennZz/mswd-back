@@ -394,7 +394,7 @@ class ApplicationController extends Controller
                 ], 500);
             }
 
-            Mail::to($getEmail)->send(new AppNotif($getEmail, $app_id));
+            // Mail::to($getEmail)->send(new AppNotif($getEmail, $app_id));
 
             return response()->json([
                 "success" => true,
@@ -512,9 +512,9 @@ class ApplicationController extends Controller
 
             if ($status->save() && $app->save()) {
 
-                if (intval($request->status) === 3) {
-                    Mail::to($getEmail)->send(new AppApprove($getEmail, $request->app_id));
-                }
+                // if (intval($request->status) === 3) {
+                //     Mail::to($getEmail)->send(new AppApprove($getEmail, $request->app_id));
+                // }
 
                 return response()->json([
                     "success" => true,

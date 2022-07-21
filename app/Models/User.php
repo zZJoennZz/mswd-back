@@ -23,7 +23,9 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
-        'is_admin'
+        'is_admin',
+        'address',
+        'barangay',
     ];
 
     /**
@@ -45,7 +47,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function blog() {
+    public function blog()
+    {
         return $this->hasMany(Blog::class);
     }
 }
