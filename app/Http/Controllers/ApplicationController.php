@@ -268,7 +268,7 @@ class ApplicationController extends Controller
 
         //create ID to prevent overwriting
         $rand = substr(md5(microtime()), rand(0, 26), 3);
-        $app_id_prefix = ($getAppType === 1 ? "SP" : ($getAppType === 2 ? "PWD" : "SC"));
+        $app_id_prefix = ($getAppType === 1 ? "SP-" . date("Y") . "-" : ($getAppType === 2 ? "PWD-03-1422-000-" : "SC-" . date("Y") . "-"));
 
         $app_id =  $app_id_prefix . $rand . date("mdyyHis");
 
