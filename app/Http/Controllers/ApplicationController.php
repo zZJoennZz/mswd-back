@@ -184,7 +184,11 @@ class ApplicationController extends Controller
         ], 401);
 
         $forId = Application::all()->last()->id;
-        $forId += 1;
+        if (count($forId) <= 0) {
+            $forId = 1;
+        } else {
+            $forId += 1;
+        }
 
         //$getEmail = json_decode($request->application_data, true)['email_address'];
         $getAppType = json_decode($request->application_data, true)['appliType'];
