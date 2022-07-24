@@ -183,7 +183,10 @@ class ApplicationController extends Controller
             "message" => "You have NO authorization here"
         ], 401);
 
-        $getEmail = json_decode($request->application_data, true)['email_address'];
+        $forId = Application::all()->last()->id;
+        $forId += 1;
+
+        //$getEmail = json_decode($request->application_data, true)['email_address'];
         $getAppType = json_decode($request->application_data, true)['appliType'];
         $isNew = 0;
         $isNew = json_decode($request->application_data, true)['appli_type'];
@@ -270,7 +273,7 @@ class ApplicationController extends Controller
         $rand = substr(md5(microtime()), rand(0, 26), 3);
         $app_id_prefix = ($getAppType === 1 ? "SP-" . date("Y") . "-" : ($getAppType === 2 ? "PWD-03-1422-000-" : "SC-" . date("Y") . "-"));
 
-        $app_id =  $app_id_prefix . $rand . date("mdyyHis");
+        $app_id =  $app_id_prefix . $forId;
 
         //check if the application submitted files then send response
         if (!$request->hasFile('application_pic') || !$request->hasFile('application_sig') || !$request->hasFile('docs')) {
