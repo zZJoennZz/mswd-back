@@ -183,10 +183,11 @@ class ApplicationController extends Controller
             "message" => "You have NO authorization here"
         ], 401);
 
-        $forId = Application::all()->last()->id;
+        $forId = Application::all();
         if (count($forId) <= 0) {
             $forId = 1;
         } else {
+            $forId = Application::all()->last()->id;
             $forId += 1;
         }
 
